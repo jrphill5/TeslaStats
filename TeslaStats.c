@@ -13,9 +13,9 @@
 double PI, PHI, C0, U0, E0;
 
 // Converts American wire gauge (WG) to wire diameter (WD) expressed in meters.
-float WD( int WG );
+float WD( float WG );
 // Converts wire diameter (WD) expressed in meters to American wire gauge (WG).
-float WG( int WD );
+float WG( float WD );
 
 // Formats and prints a full terminal width divider.
 //  - begin: The string to be printed at beginning of divider.
@@ -164,8 +164,8 @@ int main()
 
 }
 
-float WD( int WG ) { return 0.000127 * pow( 92.0, ( 36.0 - WG )/39.0 ); }
-float WG( int WD ) { return -39.0 * log10( WD / 0.000127 ) / log10( 92.0 ) + 36.0; }
+float WD( float WG ) { return 0.000127 * pow( 92.0, ( 36.0 - WG ) / 39.0 ); }
+float WG( float WD ) { return -39.0 * log10( WD / 0.000127 ) / log10( 92.0 ) + 36.0; }
 
 void divider( char* begin, char* text, char* pad, char* end )
 {
