@@ -19,6 +19,7 @@ float WG( float WD );
 
 // Returns the empirical self-capacitance of a helical coil with radius R and length L.
 float medhurst( float R, float L );
+char* SIfactor( float value );
 
 // Formats and prints a full terminal width divider.
 //  - begin: The string to be printed at beginning of divider.
@@ -127,52 +128,51 @@ int main()
 
 	ARCLN = 0.04318*sqrt( NSTVA );
 	SECHD = SECH / ( SECD + SECWD );
-
-	divider("\n","","=","\n\n");
-	divider("","TeslaStats v1.00"," ","\n");
-	divider("","Jay Phillips"," ","\n");
-	divider("\n","Neon Sign Transformer","=","\n\n");
-	printf("  Input:            %5.0f V  %5.3f A  %2.0f Hz\n", NSTVI, NSTII, NSTF);
-	printf("  Output:           %5.0f V  %5.3f A\n", NSTVO, NSTIO);
-	printf("  Power:            %5.0f W\n", NSTVA);
-	printf("  Step-up Ratio:    %5.1f:1\n", NSTTR);
-	printf("  PFC Capacitance:  %5.1f uF\n", NSTPF*1000000);
-	printf("  Impedance:        %5.1f kohm\n", NSTZ/1000);
-
-	divider("\n","Multiple Mini Capacitor Bank","=","\n\n");
-	printf("  C Reactance:      %5.1f ohm\n", MMCCR );
-	printf("  Res Capacitance:  %5.1f nF\n", MMCC*1000000000);
-	printf("  LTR Capacitance:  %5.1f nF\n", LTRC*1000000000);
-
-	divider("\n","Primary Coil","=","\n\n");
-	printf("  L Reactance:      %5.1f ohm\n", PRILR );
-	printf("  Wire Gauge:       %5.1f AWG\n", PRIWG);
-	printf("  Wire Diameter:    %5.3f mm\n", PRIWD*1000);
-	printf("  Wire Length:      %5.1f m\n", PRILN);
-	printf("  Wire Turns:       %5.0f turns\n", PRIN);
-	printf("  Inductance:       %5.1f uH\n", PRIL*1000000);
-	printf("  Frequency:        %5.1f kHz\n", PRIF/1000);
-
 	SECC = medhurst(0.5*SECD, SECH);
 
+	divider("\n","","=","\n\n");
+	divider("","TeslaStats v1.03"," ","\n");
+	divider("","Jay Phillips"," ","\n");
+	divider("\n","Neon Sign Transformer","=","\n\n");
+	printf("  Input:            %6.2f%sV  %6.2f%sA  %6.2f%sHz\n", NSTVI,SIfactor(NSTVI),NSTII,SIfactor(NSTII),NSTF,SIfactor(NSTF));
+	printf("  Output:           %6.2f%sV  %6.2f%sA\n", NSTVO/1000,SIfactor(NSTVO),NSTIO*1000,SIfactor(NSTIO));
+	printf("  Power:            %6.0f%sW\n",    NSTVA,SIfactor(NSTVA));
+	printf("  Step-up Ratio:    %6.1f:1\n",     NSTTR);
+	printf("  PFC Capacitance:  %6.1f%sF\n",    NSTPF*1000000,SIfactor(NSTPF));
+	printf("  Impedance:        %6.1f%sohm\n",  NSTZ/1000,SIfactor(NSTZ));
+
+	divider("\n","Multiple Mini Capacitor Bank","=","\n\n");
+	printf("  C Reactance:      %6.1f%sohm\n",  MMCCR,SIfactor(MMCCR));
+	printf("  Res Capacitance:  %6.1f%sF\n",    MMCC*1000000000,SIfactor(MMCC));
+	printf("  LTR Capacitance:  %6.1f%sF\n",    LTRC*1000000000,SIfactor(LTRC));
+
+	divider("\n","Primary Coil","=","\n\n");
+	printf("  L Reactance:      %6.1f%sohm\n",  PRILR,SIfactor(PRILR));
+	printf("  Wire Gauge:       %6.1f AWG\n",   PRIWG);
+	printf("  Wire Diameter:    %6.3f%sm\n",    PRIWD*1000,SIfactor(PRIWD));
+	printf("  Wire Length:      %6.1f%sm\n",    PRILN,SIfactor(PRILN));
+	printf("  Wire Turns:       %6.0f turns\n", PRIN);
+	printf("  Inductance:       %6.1f%sH\n",    PRIL*1000000,SIfactor(PRIL));
+	printf("  Frequency:        %6.1f%sHz\n",   PRIF/1000,SIfactor(PRIF));
+
 	divider("\n","Secondary Coil","=","\n\n");
-	printf("  Form Diameter:    %5.1f cm\n", SECD*100);
-	printf("  Form Height:      %5.1f cm\n", SECH*100);
-	printf("  Aspect Ratio:     %5.1f:1\n", SECHD);
-	printf("  Wire Gauge:       %5.1f AWG\n", SECWG);
-	printf("  Wire Diameter:    %5.3f mm\n", SECWD*1000);
-	printf("  Wire Length:      %5.1f m\n", SECLN);
-	printf("  Wire Turns:       %5.0f turns\n", SECN);
-	printf("  Inductance:       %5.1f mH\n", SECL*1000);
-	printf("  Capacitance:      %5.1f pF\n", SECC*1000000000000);
-	printf("  Frequency:        %5.1f kHz\n", SECF/1000);
+	printf("  Form Diameter:    %6.1f%sm\n",    SECD*1000,SIfactor(SECD));
+	printf("  Form Height:      %6.1f%sm\n",    SECH*1000,SIfactor(SECH));
+	printf("  Aspect Ratio:     %6.1f:1\n",     SECHD);
+	printf("  Wire Gauge:       %6.1f AWG\n",   SECWG);
+	printf("  Wire Diameter:    %6.1f%sm\n",    SECWD*1000000,SIfactor(SECWD));
+	printf("  Wire Length:      %6.1f%sm\n",    SECLN,SIfactor(SECLN));
+	printf("  Wire Turns:       %6.0f turns\n", SECN);
+	printf("  Inductance:       %6.1f%sH\n",    SECL*1000,SIfactor(SECL));
+	printf("  Capacitance:      %6.1f%sF\n",    SECC*1000000000000,SIfactor(SECC));
+	printf("  Frequency:        %6.1f%sHz\n",   SECF/1000,SIfactor(SECF));
 
 	divider("\n","Spherical Top Load","=","\n\n");
-	printf("  Diameter:         %5.1f cm\n", TOPD*100);
-	printf("  Capacitance:      %5.1f pF\n", TOPC*1000000000000);
+	printf("  Diameter:         %6.1f%sm\n",    TOPD*1000,SIfactor(TOPD));
+	printf("  Capacitance:      %6.1f%sF\n",    TOPC*1000000000000,SIfactor(TOPC));
 
 	divider("\n","Miscellaneous","=","\n\n");
-	printf("  Arc Length (max): %5.0f cm\n", ARCLN*100);
+	printf("  Arc Length (max): %6.1f%sm\n",    ARCLN*1000,SIfactor(ARCLN));
 
 	divider("\n","","=","\n\n");
 
@@ -204,5 +204,32 @@ float medhurst( float R, float L )
 {
 
 	return ( 1/0.0254 * (0.29*L + R * ( 0.41 + 1.94*sqrt(R / L) ) ) ) / 1000000000000.0;
+
+}
+
+char* SIfactor( float value )
+{
+
+	if ( value < 1.0 )
+	{
+
+		if ( ( value *= 1000.0 ) > 1.0 ) return "m";
+		if ( ( value *= 1000.0 ) > 1.0 ) return "u";
+		if ( ( value *= 1000.0 ) > 1.0 ) return "n";
+		if ( ( value *= 1000.0 ) > 1.0 ) return "p";
+
+	}
+	else if ( value >= 1.0 && value < 1000.0 ) return " ";
+	else
+	{
+
+		if ( ( value /= 1000.0 ) < 1000.0 ) return "K";
+		if ( ( value /= 1000.0 ) < 1000.0 ) return "M";
+		if ( ( value /= 1000.0 ) < 1000.0 ) return "G";
+		if ( ( value /= 1000.0 ) < 1000.0 ) return "T";
+
+	}
+
+	return " ";
 
 }
