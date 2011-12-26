@@ -8,4 +8,4 @@ all:
 	$(C) $(CFLAGS) $(PROJECT2).c -o $(PROJECT2)
 
 clean:
-	rm $(PROJECT)
+	rm $(PROJECT1) $(PROJECT2)
