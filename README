@@ -1,6 +1,11 @@
 This code attempts to automate all of the calculations required for the design of a generic spark gap Tesla coil.
 
 TeslaStats calculates the parameters for all of the components of a spark gap Tesla coil.
-This includes information about the Neon Sign Transformer (NST), Primary Tank Capacitor (PTC), Primary Coil (PRI), Secondary Coil (SEC), and Topload (TOP).
+This includes information about:
+  - Neon Sign Transformer (NST)
+  - Primary Tank Capacitor (PTC)
+  - Primary Coil (PRI)
+  - Secondary Coil (SEC)
+  - Topload (TOP)
 
-MMCCalc calcuates overall voltage and capacitance ratings of a Multiple Mini Capacitor (MMC) Bank.
+MMCCalc calcuates overall voltage and capacitance ratings of a Multiple Mini Capacitor (MMC) bank.
