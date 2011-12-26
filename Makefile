@@ -1,9 +1,11 @@
 C=gcc
 CFLAGS=-Wall -lm
-PROJECT=TeslaStats
+PROJECT1=TeslaStats
+PROJECT2=CapCalc
 
 all:
-	$(C) $(CFLAGS) $(PROJECT).c -o $(PROJECT)
+	$(C) $(CFLAGS) $(PROJECT1).c -o $(PROJECT1)
+	$(C) $(CFLAGS) $(PROJECT2).c -o $(PROJECT2)
 
 clean:
 	rm $(PROJECT)
