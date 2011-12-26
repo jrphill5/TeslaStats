@@ -1,3 +1,7 @@
+#define AUTHOR  "Jay Phillips"
+#define NAME    "TeslaStats"
+#define VERSION "1.04"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -12,13 +16,14 @@
 //  - E0:  Electric permittivity of free space.
 double PI, PHI, C0, U0, E0;
 
-// Converts American wire gauge (WG) to wire diameter (WD) expressed in meters.
+// Convert between American wire gauge (WG) and wire diameter (WD) expressed in meters.
 float WD( float WG );
-// Converts wire diameter (WD) expressed in meters to American wire gauge (WG).
 float WG( float WD );
 
 // Returns the empirical self-capacitance of a helical coil with radius R and length L.
 float medhurst( float R, float L );
+
+// Return the SI unit autoscale factor and prefix of a given value.
 double SIfactor( double value );
 char SIprefix( double value );
 
@@ -31,6 +36,9 @@ void divider( char* begin, char* text, char* pad, char* end );
 
 int main()
 {
+
+	// Holds information about program.
+	char name[strlen(NAME)+strlen(VERSION)+2];
 
 	// Variables pertaining to the neon sign transformer (NST).
 	//  - NSTVI: Input voltage of NST expressed in volts.
@@ -132,48 +140,51 @@ int main()
 	SECC = medhurst(0.5*SECD, SECH);
 
 	divider("\n","","=","\n\n");
-	divider("","TeslaStats v1.03"," ","\n");
-	divider("","Jay Phillips"," ","\n");
+	sprintf(name,"%s v%s",NAME,VERSION); divider("",name," ","\n");
+	divider("",AUTHOR," ","\n");
 	divider("\n","Neon Sign Transformer","=","\n\n");
-	printf("  Input:            %6.2f%cV  %6.2f%cA  %6.2f%cHz\n", NSTVI*SIfactor(NSTVI),SIprefix(NSTVI),NSTII*SIfactor(NSTII),SIprefix(NSTII),NSTF*SIfactor(NSTF),SIprefix(NSTF));
-	printf("  Output:           %6.2f%cV  %6.2f%cA\n",            NSTVO*SIfactor(NSTVO),SIprefix(NSTVO),NSTIO*SIfactor(NSTIO),SIprefix(NSTIO));
-	printf("  Power:            %6.0f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
-	printf("  Step-up Ratio:    %6.1f:1\n",     NSTTR);
-	printf("  PFC Capacitance:  %6.1f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
-	printf("  Impedance:        %6.1f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
+	printf("  Input Voltage:    %6.2f%cV\n",    NSTVI* SIfactor(NSTVI), SIprefix(NSTVI));
+	printf("  Input Current:    %6.2f%cA\n",    NSTII* SIfactor(NSTII), SIprefix(NSTII));
+	printf("  Input Frequency:  %6.2f%cHz\n",   NSTF*  SIfactor(NSTF),  SIprefix(NSTF));
+	printf("  Output Voltage:   %6.2f%cV\n",    NSTVO* SIfactor(NSTVO), SIprefix(NSTVO));
+	printf("  Output Current:   %6.2f%cA\n",    NSTIO* SIfactor(NSTIO), SIprefix(NSTIO));
+	printf("  Power:            %6.2f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
+	printf("  Step-up Ratio:    %6.2f:1\n",     NSTTR);
+	printf("  PFC Capacitance:  %6.2f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
+	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
 	divider("\n","Multiple Mini Capacitor Bank","=","\n\n");
-	printf("  C Reactance:      %6.1f%cohm\n",  MMCCR* SIfactor(MMCCR), SIprefix(MMCCR));
-	printf("  Res Capacitance:  %6.1f%cF\n",    MMCC*  SIfactor(MMCC),  SIprefix(MMCC));
-	printf("  LTR Capacitance:  %6.1f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
+	printf("  C Reactance:      %6.2f%cohm\n",  MMCCR* SIfactor(MMCCR), SIprefix(MMCCR));
+	printf("  Res Capacitance:  %6.2f%cF\n",    MMCC*  SIfactor(MMCC),  SIprefix(MMCC));
+	printf("  LTR Capacitance:  %6.2f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
 
 	divider("\n","Primary Coil","=","\n\n");
-	printf("  L Reactance:      %6.1f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
-	printf("  Wire Gauge:       %6.1f AWG\n",   PRIWG);
-	printf("  Wire Diameter:    %6.3f%cm\n",    PRIWD* SIfactor(PRIWD), SIprefix(PRIWD));
-	printf("  Wire Length:      %6.1f%cm\n",    PRILN* SIfactor(PRILN), SIprefix(PRILN));
-	printf("  Wire Turns:       %6.0f turns\n", PRIN);
-	printf("  Inductance:       %6.1f%cH\n",    PRIL*  SIfactor(PRIL),  SIprefix(PRIL));
-	printf("  Frequency:        %6.1f%cHz\n",   PRIF*  SIfactor(PRIF),  SIprefix(PRIF));
+	printf("  L Reactance:      %6.2f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
+	printf("  Wire Gauge:       %6.2f AWG\n",   PRIWG);
+	printf("  Wire Diameter:    %6.2f%cm\n",    PRIWD* SIfactor(PRIWD), SIprefix(PRIWD));
+	printf("  Wire Length:      %6.2f%cm\n",    PRILN* SIfactor(PRILN), SIprefix(PRILN));
+	printf("  Wire Turns:       %6.2f turns\n", PRIN);
+	printf("  Inductance:       %6.2f%cH\n",    PRIL*  SIfactor(PRIL),  SIprefix(PRIL));
+	printf("  Frequency:        %6.2f%cHz\n",   PRIF*  SIfactor(PRIF),  SIprefix(PRIF));
 
 	divider("\n","Secondary Coil","=","\n\n");
-	printf("  Form Diameter:    %6.1f%cm\n",    SECD*  SIfactor(SECD),  SIprefix(SECD));
-	printf("  Form Height:      %6.1f%cm\n",    SECH*  SIfactor(SECH),  SIprefix(SECH));
-	printf("  Aspect Ratio:     %6.1f:1\n",     SECHD);
-	printf("  Wire Gauge:       %6.1f AWG\n",   SECWG);
-	printf("  Wire Diameter:    %6.1f%cm\n",    SECWD* SIfactor(SECWD), SIprefix(SECWD));
-	printf("  Wire Length:      %6.1f%cm\n",    SECLN* SIfactor(SECLN), SIprefix(SECLN));
-	printf("  Wire Turns:       %6.0f turns\n", SECN);
-	printf("  Inductance:       %6.1f%cH\n",    SECL*  SIfactor(SECL),  SIprefix(SECL));
-	printf("  Capacitance:      %6.1f%cF\n",    SECC*  SIfactor(SECC),  SIprefix(SECC));
-	printf("  Frequency:        %6.1f%cHz\n",   SECF*  SIfactor(SECF),  SIprefix(SECF));
+	printf("  Form Diameter:    %6.2f%cm\n",    SECD*  SIfactor(SECD),  SIprefix(SECD));
+	printf("  Form Height:      %6.2f%cm\n",    SECH*  SIfactor(SECH),  SIprefix(SECH));
+	printf("  Aspect Ratio:     %6.2f:1\n",     SECHD);
+	printf("  Wire Gauge:       %6.2f AWG\n",   SECWG);
+	printf("  Wire Diameter:    %6.2f%cm\n",    SECWD* SIfactor(SECWD), SIprefix(SECWD));
+	printf("  Wire Length:      %6.2f%cm\n",    SECLN* SIfactor(SECLN), SIprefix(SECLN));
+	printf("  Wire Turns:       %6.2f turns\n", SECN);
+	printf("  Inductance:       %6.2f%cH\n",    SECL*  SIfactor(SECL),  SIprefix(SECL));
+	printf("  Capacitance:      %6.2f%cF\n",    SECC*  SIfactor(SECC),  SIprefix(SECC));
+	printf("  Frequency:        %6.2f%cHz\n",   SECF*  SIfactor(SECF),  SIprefix(SECF));
 
 	divider("\n","Spherical Top Load","=","\n\n");
-	printf("  Diameter:         %6.1f%cm\n",    TOPD*  SIfactor(TOPD),  SIprefix(TOPD));
-	printf("  Capacitance:      %6.1f%cF\n",    TOPC*  SIfactor(TOPC),  SIprefix(TOPC));
+	printf("  Diameter:         %6.2f%cm\n",    TOPD*  SIfactor(TOPD),  SIprefix(TOPD));
+	printf("  Capacitance:      %6.2f%cF\n",    TOPC*  SIfactor(TOPC),  SIprefix(TOPC));
 
 	divider("\n","Miscellaneous","=","\n\n");
-	printf("  Arc Length (max): %6.1f%cm\n",    ARCLN* SIfactor(ARCLN), SIprefix(ARCLN));
+	printf("  Arc Length (max): %6.2f%cm\n",    ARCLN* SIfactor(ARCLN), SIprefix(ARCLN));
 
 	divider("\n","","=","\n\n");
 
