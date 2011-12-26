@@ -19,7 +19,8 @@ float WG( float WD );
 
 // Returns the empirical self-capacitance of a helical coil with radius R and length L.
 float medhurst( float R, float L );
-char* SIfactor( float value );
+double SIfactor( double value );
+char SIprefix( double value );
 
 // Formats and prints a full terminal width divider.
 //  - begin: The string to be printed at beginning of divider.
@@ -134,45 +135,45 @@ int main()
 	divider("","TeslaStats v1.03"," ","\n");
 	divider("","Jay Phillips"," ","\n");
 	divider("\n","Neon Sign Transformer","=","\n\n");
-	printf("  Input:            %6.2f%sV  %6.2f%sA  %6.2f%sHz\n", NSTVI,SIfactor(NSTVI),NSTII,SIfactor(NSTII),NSTF,SIfactor(NSTF));
-	printf("  Output:           %6.2f%sV  %6.2f%sA\n", NSTVO/1000,SIfactor(NSTVO),NSTIO*1000,SIfactor(NSTIO));
-	printf("  Power:            %6.0f%sW\n",    NSTVA,SIfactor(NSTVA));
+	printf("  Input:            %6.2f%cV  %6.2f%cA  %6.2f%cHz\n", NSTVI*SIfactor(NSTVI),SIprefix(NSTVI),NSTII*SIfactor(NSTII),SIprefix(NSTII),NSTF*SIfactor(NSTF),SIprefix(NSTF));
+	printf("  Output:           %6.2f%cV  %6.2f%cA\n",            NSTVO*SIfactor(NSTVO),SIprefix(NSTVO),NSTIO*SIfactor(NSTIO),SIprefix(NSTIO));
+	printf("  Power:            %6.0f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
 	printf("  Step-up Ratio:    %6.1f:1\n",     NSTTR);
-	printf("  PFC Capacitance:  %6.1f%sF\n",    NSTPF*1000000,SIfactor(NSTPF));
-	printf("  Impedance:        %6.1f%sohm\n",  NSTZ/1000,SIfactor(NSTZ));
+	printf("  PFC Capacitance:  %6.1f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
+	printf("  Impedance:        %6.1f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
 	divider("\n","Multiple Mini Capacitor Bank","=","\n\n");
-	printf("  C Reactance:      %6.1f%sohm\n",  MMCCR,SIfactor(MMCCR));
-	printf("  Res Capacitance:  %6.1f%sF\n",    MMCC*1000000000,SIfactor(MMCC));
-	printf("  LTR Capacitance:  %6.1f%sF\n",    LTRC*1000000000,SIfactor(LTRC));
+	printf("  C Reactance:      %6.1f%cohm\n",  MMCCR* SIfactor(MMCCR), SIprefix(MMCCR));
+	printf("  Res Capacitance:  %6.1f%cF\n",    MMCC*  SIfactor(MMCC),  SIprefix(MMCC));
+	printf("  LTR Capacitance:  %6.1f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
 
 	divider("\n","Primary Coil","=","\n\n");
-	printf("  L Reactance:      %6.1f%sohm\n",  PRILR,SIfactor(PRILR));
+	printf("  L Reactance:      %6.1f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
 	printf("  Wire Gauge:       %6.1f AWG\n",   PRIWG);
-	printf("  Wire Diameter:    %6.3f%sm\n",    PRIWD*1000,SIfactor(PRIWD));
-	printf("  Wire Length:      %6.1f%sm\n",    PRILN,SIfactor(PRILN));
+	printf("  Wire Diameter:    %6.3f%cm\n",    PRIWD* SIfactor(PRIWD), SIprefix(PRIWD));
+	printf("  Wire Length:      %6.1f%cm\n",    PRILN* SIfactor(PRILN), SIprefix(PRILN));
 	printf("  Wire Turns:       %6.0f turns\n", PRIN);
-	printf("  Inductance:       %6.1f%sH\n",    PRIL*1000000,SIfactor(PRIL));
-	printf("  Frequency:        %6.1f%sHz\n",   PRIF/1000,SIfactor(PRIF));
+	printf("  Inductance:       %6.1f%cH\n",    PRIL*  SIfactor(PRIL),  SIprefix(PRIL));
+	printf("  Frequency:        %6.1f%cHz\n",   PRIF*  SIfactor(PRIF),  SIprefix(PRIF));
 
 	divider("\n","Secondary Coil","=","\n\n");
-	printf("  Form Diameter:    %6.1f%sm\n",    SECD*1000,SIfactor(SECD));
-	printf("  Form Height:      %6.1f%sm\n",    SECH*1000,SIfactor(SECH));
+	printf("  Form Diameter:    %6.1f%cm\n",    SECD*  SIfactor(SECD),  SIprefix(SECD));
+	printf("  Form Height:      %6.1f%cm\n",    SECH*  SIfactor(SECH),  SIprefix(SECH));
 	printf("  Aspect Ratio:     %6.1f:1\n",     SECHD);
 	printf("  Wire Gauge:       %6.1f AWG\n",   SECWG);
-	printf("  Wire Diameter:    %6.1f%sm\n",    SECWD*1000000,SIfactor(SECWD));
-	printf("  Wire Length:      %6.1f%sm\n",    SECLN,SIfactor(SECLN));
+	printf("  Wire Diameter:    %6.1f%cm\n",    SECWD* SIfactor(SECWD), SIprefix(SECWD));
+	printf("  Wire Length:      %6.1f%cm\n",    SECLN* SIfactor(SECLN), SIprefix(SECLN));
 	printf("  Wire Turns:       %6.0f turns\n", SECN);
-	printf("  Inductance:       %6.1f%sH\n",    SECL*1000,SIfactor(SECL));
-	printf("  Capacitance:      %6.1f%sF\n",    SECC*1000000000000,SIfactor(SECC));
-	printf("  Frequency:        %6.1f%sHz\n",   SECF/1000,SIfactor(SECF));
+	printf("  Inductance:       %6.1f%cH\n",    SECL*  SIfactor(SECL),  SIprefix(SECL));
+	printf("  Capacitance:      %6.1f%cF\n",    SECC*  SIfactor(SECC),  SIprefix(SECC));
+	printf("  Frequency:        %6.1f%cHz\n",   SECF*  SIfactor(SECF),  SIprefix(SECF));
 
 	divider("\n","Spherical Top Load","=","\n\n");
-	printf("  Diameter:         %6.1f%sm\n",    TOPD*1000,SIfactor(TOPD));
-	printf("  Capacitance:      %6.1f%sF\n",    TOPC*1000000000000,SIfactor(TOPC));
+	printf("  Diameter:         %6.1f%cm\n",    TOPD*  SIfactor(TOPD),  SIprefix(TOPD));
+	printf("  Capacitance:      %6.1f%cF\n",    TOPC*  SIfactor(TOPC),  SIprefix(TOPC));
 
 	divider("\n","Miscellaneous","=","\n\n");
-	printf("  Arc Length (max): %6.1f%sm\n",    ARCLN*1000,SIfactor(ARCLN));
+	printf("  Arc Length (max): %6.1f%cm\n",    ARCLN* SIfactor(ARCLN), SIprefix(ARCLN));
 
 	divider("\n","","=","\n\n");
 
@@ -207,29 +208,57 @@ float medhurst( float R, float L )
 
 }
 
-char* SIfactor( float value )
+// allow specification of preferred unit
+double SIfactor( double value )
 {
 
 	if ( value < 1.0 )
 	{
 
-		if ( ( value *= 1000.0 ) > 1.0 ) return "m";
-		if ( ( value *= 1000.0 ) > 1.0 ) return "u";
-		if ( ( value *= 1000.0 ) > 1.0 ) return "n";
-		if ( ( value *= 1000.0 ) > 1.0 ) return "p";
+		if ( ( value *= 1000.0 ) > 1.0 ) return 1.0e3;   // milli
+		if ( ( value *= 1000.0 ) > 1.0 ) return 1.0e6;   // micro
+		if ( ( value *= 1000.0 ) > 1.0 ) return 1.0e9;   // nano
+		if ( ( value *= 1000.0 ) > 1.0 ) return 1.0e12;  // pico
 
 	}
-	else if ( value >= 1.0 && value < 1000.0 ) return " ";
 	else
 	{
 
-		if ( ( value /= 1000.0 ) < 1000.0 ) return "K";
-		if ( ( value /= 1000.0 ) < 1000.0 ) return "M";
-		if ( ( value /= 1000.0 ) < 1000.0 ) return "G";
-		if ( ( value /= 1000.0 ) < 1000.0 ) return "T";
+		if ( ( value /= 1000.0 ) < 1.0 ) return 1.0;     // base
+		if ( ( value /= 1000.0 ) < 1.0 ) return 1.0e-3;  // kilo
+		if ( ( value /= 1000.0 ) < 1.0 ) return 1.0e-6;  // mega
+		if ( ( value /= 1000.0 ) < 1.0 ) return 1.0e-9;  // giga
+		if ( ( value /= 1000.0 ) < 1.0 ) return 1.0e-12; // tera
 
 	}
 
-	return " ";
+	return 1.0;
+
+}
+
+char SIprefix( double value )
+{
+
+	if ( value < 1.0 )
+	{
+
+		if ( ( value *= 1000.0 ) > 1.0 ) return 'm'; // milli
+		if ( ( value *= 1000.0 ) > 1.0 ) return 'u'; // micro
+		if ( ( value *= 1000.0 ) > 1.0 ) return 'n'; // nano
+		if ( ( value *= 1000.0 ) > 1.0 ) return 'p'; // pico
+
+	}
+	else
+	{
+
+		if ( ( value /= 1000.0 ) < 1.0 ) return ' '; // base
+		if ( ( value /= 1000.0 ) < 1.0 ) return 'K'; // kilo
+		if ( ( value /= 1000.0 ) < 1.0 ) return 'M'; // mega
+		if ( ( value /= 1000.0 ) < 1.0 ) return 'G'; // giga
+		if ( ( value /= 1000.0 ) < 1.0 ) return 'T'; // tera
+
+	}
+
+	return ' ';
 
 }
