@@ -12,4 +12,3 @@ void center( char* begin, char* text, int col, char pad, char* end )
 	printf("%s", end);
 
 }
-
