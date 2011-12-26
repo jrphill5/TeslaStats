@@ -58,12 +58,12 @@ int main()
 	//  - NSTPF: Power factor correction capacitance for NST expressed in farads.
 	float NSTVI, NSTII, NSTF, NSTVO, NSTIO, NSTVA, NSTTR, NSTZ, NSTPF;
 
-	// Variables pertaining to the multiple mini capacitor bank (MMC).
-	//  - MMCC:  Resonant capacitance for MMC expressed in farads.
-	//  - LTRC:  Larger than resonant capacitance for MMC expressed in farads.
-	//  - MMCCR: Capacitive reactance of MMC expressed in ohms.
+	// Variables pertaining to the primary tank capacitor (PTC).
+	//  - PTCC:  Resonant capacitance for PTC expressed in farads.
+	//  - LTRC:  Larger than resonant capacitance for PTC expressed in farads.
+	//  - PTCCR: Capacitive reactance of PTC expressed in ohms.
 	//  - PRILR: Inductive reactance of PRI expressed in ohms.
-	float MMCCR, MMCC, LTRC, PRILR;
+	float PTCCR, PTCC, LTRC, PRILR;
 
 	// Variables pertaining to the primary coil (PRI).
 	//  - PRIWG: American wire gauge of PRI.
@@ -127,17 +127,17 @@ int main()
 	/* GOOD */ NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
 
 	/* GOOD */ NSTZ  = NSTVO / NSTIO;
-	/* GOOD */ MMCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
-	/* GOOD */ LTRC  = MMCC * PHI;
+	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
+	/* GOOD */ LTRC  = PTCC * PHI;
 
 	SECF  = 0.25 * C0 / SECLN;
-	MMCCR = 1.0 / ( 2.0*PI*SECF*MMCC );
-	PRILR = MMCCR;
+	PTCCR = 1.0 / ( 2.0*PI*SECF*PTCC );
+	PRILR = PTCCR;
 	PRIL  = PRILR / ( 2.0*PI*SECF );
 
 	TOPC  = 0.5 * TOPD / 9000000000;
 
-	PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*MMCC) );
+	PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*PTCC) );
 	SECF  = PRIF;
 	PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);
 
@@ -161,9 +161,9 @@ int main()
 	printf("  PFC Capacitance:  %6.2f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
 	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
-	center("\n","Multiple Mini Capacitor Bank",w.ws_col,'=',"\n\n");
-	printf("  C Reactance:      %6.2f%cohm\n",  MMCCR* SIfactor(MMCCR), SIprefix(MMCCR));
-	printf("  Res Capacitance:  %6.2f%cF\n",    MMCC*  SIfactor(MMCC),  SIprefix(MMCC));
+	center("\n","Primary Tank Capacitor",w.ws_col,'=',"\n\n");
+	printf("  C Reactance:      %6.2f%cohm\n",  PTCCR* SIfactor(PTCCR), SIprefix(PTCCR));
+	printf("  Res Capacitance:  %6.2f%cF\n",    PTCC*  SIfactor(PTCC),  SIprefix(PTCC));
 	printf("  LTR Capacitance:  %6.2f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
 
 	center("\n","Primary Coil",w.ws_col,'=',"\n\n");
