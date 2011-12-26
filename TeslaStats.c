@@ -1,11 +1,12 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.04"
+#define VERSION "1.05"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "center.c"
 #include <sys/ioctl.h>
 
 // Global constants and ratios.
@@ -27,18 +28,23 @@ float medhurst( float R, float L );
 double SIfactor( double value );
 char SIprefix( double value );
 
-// Formats and prints a full terminal width divider.
-//  - begin: The string to be printed at beginning of divider.
-//  - text:  The text that will name the divider.
-//  - pad:   The padding character that makes up divider.
-//  - end:   The string to be printed at end of divider.
-void divider( char* begin, char* text, char* pad, char* end );
+// Formats and centers text.
+//  - begin: The string to be printed at beginning of line.
+//  - text:  The text to be centered.
+//  - col:   The number of columns the text will be centered in.
+//  - pad:   The padding character use for centering.
+//  - end:   The string to be printed at end of line.
+extern void center( char* begin, char* text, int col, char pad, char* end );
 
 int main()
 {
 
 	// Holds information about program.
 	char name[strlen(NAME)+strlen(VERSION)+2];
+
+	// Holds information about terminal size.
+	struct winsize w;
+	ioctl(0, TIOCGWINSZ, &w);
 
 	// Variables pertaining to the neon sign transformer (NST).
 	//  - NSTVI: Input voltage of NST expressed in volts.
@@ -139,10 +145,12 @@ int main()
 	SECHD = SECH / ( SECD + SECWD );
 	SECC = medhurst(0.5*SECD, SECH);
 
-	divider("\n","","=","\n\n");
-	sprintf(name,"%s v%s",NAME,VERSION); divider("",name," ","\n");
-	divider("",AUTHOR," ","\n");
-	divider("\n","Neon Sign Transformer","=","\n\n");
+	center("\n","",w.ws_col,'=',"\n\n");
+	sprintf(name,"%s v%s",NAME,VERSION);
+	center("",name,w.ws_col,' ',"\n");
+	center("",AUTHOR,w.ws_col,' ',"\n");
+
+	center("\n","Neon Sign Transformer",w.ws_col,'=',"\n\n");
 	printf("  Input Voltage:    %6.2f%cV\n",    NSTVI* SIfactor(NSTVI), SIprefix(NSTVI));
 	printf("  Input Current:    %6.2f%cA\n",    NSTII* SIfactor(NSTII), SIprefix(NSTII));
 	printf("  Input Frequency:  %6.2f%cHz\n",   NSTF*  SIfactor(NSTF),  SIprefix(NSTF));
@@ -153,12 +161,12 @@ int main()
 	printf("  PFC Capacitance:  %6.2f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
 	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
-	divider("\n","Multiple Mini Capacitor Bank","=","\n\n");
+	center("\n","Multiple Mini Capacitor Bank",w.ws_col,'=',"\n\n");
 	printf("  C Reactance:      %6.2f%cohm\n",  MMCCR* SIfactor(MMCCR), SIprefix(MMCCR));
 	printf("  Res Capacitance:  %6.2f%cF\n",    MMCC*  SIfactor(MMCC),  SIprefix(MMCC));
 	printf("  LTR Capacitance:  %6.2f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
 
-	divider("\n","Primary Coil","=","\n\n");
+	center("\n","Primary Coil",w.ws_col,'=',"\n\n");
 	printf("  L Reactance:      %6.2f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
 	printf("  Wire Gauge:       %6.2f AWG\n",   PRIWG);
 	printf("  Wire Diameter:    %6.2f%cm\n",    PRIWD* SIfactor(PRIWD), SIprefix(PRIWD));
@@ -167,7 +175,7 @@ int main()
 	printf("  Inductance:       %6.2f%cH\n",    PRIL*  SIfactor(PRIL),  SIprefix(PRIL));
 	printf("  Frequency:        %6.2f%cHz\n",   PRIF*  SIfactor(PRIF),  SIprefix(PRIF));
 
-	divider("\n","Secondary Coil","=","\n\n");
+	center("\n","Secondary Coil",w.ws_col,'=',"\n\n");
 	printf("  Form Diameter:    %6.2f%cm\n",    SECD*  SIfactor(SECD),  SIprefix(SECD));
 	printf("  Form Height:      %6.2f%cm\n",    SECH*  SIfactor(SECH),  SIprefix(SECH));
 	printf("  Aspect Ratio:     %6.2f:1\n",     SECHD);
@@ -179,14 +187,14 @@ int main()
 	printf("  Capacitance:      %6.2f%cF\n",    SECC*  SIfactor(SECC),  SIprefix(SECC));
 	printf("  Frequency:        %6.2f%cHz\n",   SECF*  SIfactor(SECF),  SIprefix(SECF));
 
-	divider("\n","Spherical Top Load","=","\n\n");
+	center("\n","Spherical Top Load",w.ws_col,'=',"\n\n");
 	printf("  Diameter:         %6.2f%cm\n",    TOPD*  SIfactor(TOPD),  SIprefix(TOPD));
 	printf("  Capacitance:      %6.2f%cF\n",    TOPC*  SIfactor(TOPC),  SIprefix(TOPC));
 
-	divider("\n","Miscellaneous","=","\n\n");
+	center("\n","Miscellaneous",w.ws_col,'=',"\n\n");
 	printf("  Arc Length (max): %6.2f%cm\n",    ARCLN* SIfactor(ARCLN), SIprefix(ARCLN));
 
-	divider("\n","","=","\n\n");
+	center("\n","",w.ws_col,'=',"\n\n");
 
 	return 0;
 
@@ -194,23 +202,6 @@ int main()
 
 float WD( float WG ) { return 0.000127 * pow( 92.0, ( 36.0 - WG ) / 39.0 ); }
 float WG( float WD ) { return -39.0 * log10( WD / 0.000127 ) / log10( 92.0 ) + 36.0; }
-
-void divider( char* begin, char* text, char* pad, char* end )
-{
-
-	struct winsize w;
-	ioctl(0, TIOCGWINSZ, &w);
-	int i, j = 0.5 * ( w.ws_col - strlen(text) - 2 );
-
-	printf("%s", begin);
-	for ( i = 0; i < j; i++ ) printf("%s",pad);
-	if ( *text != '\0' ) printf(" %s ", text);
-	else printf("%s%s", pad, pad);
-	j += 2 + strlen(text);
-	for ( i = j; i < w.ws_col; i++ ) printf("%s",pad);
-	printf("%s", end);
-
-}
 
 float medhurst( float R, float L )
 {
