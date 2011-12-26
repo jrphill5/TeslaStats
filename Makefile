@@ -1,7 +1,7 @@
 C=gcc
 CFLAGS=-Wall -lm
 PROJECT1=TeslaStats
-PROJECT2=CapCalc
+PROJECT2=MMCCalc
 
 all:
 	$(C) $(CFLAGS) $(PROJECT1).c -o $(PROJECT1)
