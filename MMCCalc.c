@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "MMC Capacitance Calculator"
-#define VERSION "1.03"
+#define VERSION "1.04"
 
 #include <stdio.h>
 #include <string.h>
@@ -33,21 +33,14 @@ int main()
 	float TC, TV, error;
 
 	// Hold information about smallest MMC possible.
-	int MINIMUM = 0,  MINCAPS = 0;
 	int MINSER = 0,   MINPAR = 0;
 	float MINC = 0.0, MINV = 0.0;
+	float MINIMUM = 1.0;
 	
-	/*printf("Enter Individual Capacitance (F)  : ");
-	scanf("%f",&MCC);
-	printf("Enter Individual Voltage Rating (V): ");
-	scanf("%f",&MCV);*/
-	MCC = 0.00000015; MCV = 1200;
-
-	/*printf("Enter Target Capacitance (F)  : ");
-	scanf("%f",&TC);
-	printf("Enter Target Voltage Rating (V): ");
-	scanf("%f",&TV);*/
-	TC = 0.0000000144; TV = 9000; error = 1e-9;
+	// Define values for the parameters of the MMC.
+	MCC = 0.15e-6; MCV = 1200;
+	TC = 14.31e-9;  TV = 9000;
+	error = 1.0e-9;
 
 	// Holds information about terminal size.
 	struct winsize w;
@@ -58,9 +51,44 @@ int main()
 	int col = ( w.ws_col - 17 ) / 11;
 	int width = 11*col+16;
 
-	// Hold all capacitance and voltage values for MMC.
-	float MMCC[row][col], MMCV[row];
+	// Hold all voltage, capacitance, and delta values for MMC.
+	float MMCV[row], MMCC[row][col], del;
 
+	// Calculate voltages and equivalent capacitances of MMC.
+	for ( ser = 0; ser <= row; ser++ )
+	{
+
+		if ( ser != row && ser != 0 ) MMCV[ser] = ser*MCV;
+		for ( par = 1; par <= col; par++ )
+		{
+
+			if ( ser != row && ser != 0 )
+			{
+
+				MMCC[ser][par] = eqcap(ser, par);
+				del = fabs( MMCC[ser][par] - TC ) * ser*ser*par*par;
+				// Determine optimum size of MMC array.
+				if ( fabs( MMCC[ser][par] - TC ) <= error && MMCV[ser] >= TV )
+				{
+
+					if ( del < MINIMUM )
+					{
+					
+						MINIMUM = del;
+						MINSER = ser;
+						MINPAR = par;
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	// Print tabulated calculated values to stdout.
 	printf("+"); for ( par = 1; par <= width; par++ ) printf("-"); printf("+");
 	sprintf(name,"%s v%s",NAME,VERSION);
 	center("\n|",name,width,' ',"|");
@@ -73,30 +101,21 @@ int main()
 	{
 
 		if ( ser == row || ser == 0 ) printf("\n+-----+----------+");
-		else
-		{
-			
-			MMCV[ser] = ser*MCV;
-			printf("\n| %3d | %6.2f%cV |", ser, MMCV[ser]*SIfactor(MMCV[ser]), SIprefix(MMCV[ser]));
+		else printf("\n| %3d | %6.2f%cV |", ser, MMCV[ser]*SIfactor(MMCV[ser]), SIprefix(MMCV[ser]));
 
-		}
 		for ( par = 1; par <= col; par++ )
 		{
+
 			if ( ser == row || ser == 0 ) printf("----------+");
 			else
 			{
 
-				MMCC[ser][par] = eqcap(ser, par);
-				if ( fabs(MMCC[ser][par] - TC) < error && MMCV[ser] > TV )
+				if ( fabs( MMCC[ser][par] - TC ) <= error && MMCV[ser] >= TV )
 				{
 
-					if ( MINIMUM == 0 )
+					if ( MINSER == ser && MINPAR == par )
 					{
 						
-						MINIMUM = 1;
-						MINSER = ser;
-						MINPAR = par;
-						MINCAPS = ser*par;
 						MINC = MMCC[ser][par];
 						MINV = MMCV[ser];
 						printf(" [01;32m");
@@ -113,10 +132,12 @@ int main()
 		}
 
 	}
+
+	// Print optimal specs for MMC array to stdout.
 	char string[50];
 	sprintf(string, "%d parallel x %d series array", MINPAR, MINSER);
 	center("\n|",string,width,' ',"|");
-	sprintf(string, "%dx %0.2f%cF/%0.2f%cV capacitors", MINCAPS, MCC*SIfactor(MCC), SIprefix(MCC), MCV*SIfactor(MCV), SIprefix(MCV));
+	sprintf(string, "%dx %0.2f%cF/%0.2f%cV capacitors", MINSER*MINPAR, MCC*SIfactor(MCC), SIprefix(MCC), MCV*SIfactor(MCV), SIprefix(MCV));
 	center("\n|",string,width,' ',"|");
 	sprintf(string, "MMC rated at %0.2f%cF/%0.2f%cV", MINC*SIfactor(MINC), SIprefix(MINC), MINV*SIfactor(MINV), SIprefix(MINV));
 	center("\n|",string,width,' ',"|");
