@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "MMC Capacitance Calculator"
-#define VERSION "1.04"
+#define VERSION "1.05"
 
 #include <stdio.h>
 #include <string.h>
@@ -9,16 +9,19 @@
 #include "center.c"
 #include "SI.c"
 
+// Declare external centering function.
 extern void center( char* begin, char* text, int col, char pad, char* end );
+
+// Calculate the equivalent capacitance of an MMC with
+// ser series capacitors and par parallel strands.
 float eqcap( int ser, int par );
+
+// Hold the capacitance and voltage values of an individual capacitor.
 float MCC, MCV;
 
 // Return the SI unit autoscale factor and prefix of a given value.
 extern double SIfactor( double value );
 extern char SIprefix( double value );
-
-// Have user enter target voltage and capacitance
-// and make program highlight closest match.
 
 int main()
 {
@@ -30,17 +33,12 @@ int main()
 	int ser, par;
 
 	// Hold information pertaining to the target specs of the MMC.
-	float TC, TV, error;
+	float TC, TV, tol;
 
-	// Hold information about smallest MMC possible.
-	int MINSER = 0,   MINPAR = 0;
-	float MINC = 0.0, MINV = 0.0;
-	float MINIMUM = 1.0;
-	
 	// Define values for the parameters of the MMC.
 	MCC = 0.15e-6; MCV = 1200;
 	TC = 14.31e-9;  TV = 9000;
-	error = 1.0e-9;
+	tol = 1.0e-9;
 
 	// Holds information about terminal size.
 	struct winsize w;
@@ -54,37 +52,33 @@ int main()
 	// Hold all voltage, capacitance, and delta values for MMC.
 	float MMCV[row], MMCC[row][col], del;
 
+	// Hold information about smallest MMC possible.
+	int MINSER[col]; for ( par = 0; par <= col; par++ ) MINSER[par] = 0;
+	
+	// Hold closest matches for each parallel strand of capacitors.
+	float MINIMUM[col]; for ( par = 0; par <= col; par++ ) MINIMUM[par] = 1.0;
+
 	// Calculate voltages and equivalent capacitances of MMC.
 	for ( ser = 0; ser <= row; ser++ )
 	{
 
 		if ( ser != row && ser != 0 ) MMCV[ser] = ser*MCV;
 		for ( par = 1; par <= col; par++ )
-		{
-
 			if ( ser != row && ser != 0 )
 			{
 
 				MMCC[ser][par] = eqcap(ser, par);
-				del = fabs( MMCC[ser][par] - TC ) * ser*ser*par*par;
+				del = fabs( MMCC[ser][par] - TC );
 				// Determine optimum size of MMC array.
-				if ( fabs( MMCC[ser][par] - TC ) <= error && MMCV[ser] >= TV )
+				if ( MMCV[ser] >= TV && del <= tol && del < MINIMUM[par] )
 				{
 
-					if ( del < MINIMUM )
-					{
-					
-						MINIMUM = del;
-						MINSER = ser;
-						MINPAR = par;
-
-					}
+					MINIMUM[par] = del;
+					MINSER[par] = ser;
 
 				}
 
 			}
-
-		}
 
 	}
 
@@ -104,44 +98,38 @@ int main()
 		else printf("\n| %3d | %6.2f%cV |", ser, MMCV[ser]*SIfactor(MMCV[ser]), SIprefix(MMCV[ser]));
 
 		for ( par = 1; par <= col; par++ )
-		{
-
 			if ( ser == row || ser == 0 ) printf("----------+");
 			else
 			{
 
-				if ( fabs( MMCC[ser][par] - TC ) <= error && MMCV[ser] >= TV )
-				{
-
-					if ( MINSER == ser && MINPAR == par )
-					{
-						
-						MINC = MMCC[ser][par];
-						MINV = MMCV[ser];
-						printf(" [01;32m");
-
-					}
+				if ( fabs( MMCC[ser][par] - TC ) <= tol && MMCV[ser] >= TV )
+					if ( MINSER[par] == ser ) printf(" [01;32m");
 					else printf(" [01;31m");
-
-				}
 				else printf(" ");
 				printf("%6.2f%cF[0m |", MMCC[ser][par]*SIfactor(MMCC[ser][par]), SIprefix(MMCC[ser][par]));
 
 			}
 
-		}
-
 	}
 
-	// Print optimal specs for MMC array to stdout.
+	//Print optimal specs for MMC array to stdout.
 	char string[50];
-	sprintf(string, "%d parallel x %d series array", MINPAR, MINSER);
-	center("\n|",string,width,' ',"|");
-	sprintf(string, "%dx %0.2f%cF/%0.2f%cV capacitors", MINSER*MINPAR, MCC*SIfactor(MCC), SIprefix(MCC), MCV*SIfactor(MCV), SIprefix(MCV));
-	center("\n|",string,width,' ',"|");
-	sprintf(string, "MMC rated at %0.2f%cF/%0.2f%cV", MINC*SIfactor(MINC), SIprefix(MINC), MINV*SIfactor(MINV), SIprefix(MINV));
-	center("\n|",string,width,' ',"|");
-	printf("\n+"); for ( par = 1; par <= width; par++ ) printf("-"); printf("+\n");
+	for ( par = 0; par <= col; par++ )
+		if ( MINSER[par] != 0 )
+		{
+
+			float MINC = eqcap( MINSER[par], par );
+			float MINV = MINSER[par] * MCV;
+			sprintf(string, "%d parallel x %d series array", par, MINSER[par]);
+			center("\n|",string,width,' ',"|");
+			sprintf(string, "%dx %0.2f%cF/%0.2f%cV capacitors", MINSER[par]*par, MCC*SIfactor(MCC), SIprefix(MCC), MCV*SIfactor(MCV), SIprefix(MCV));
+			center("\n|",string,width,' ',"|");
+			sprintf(string, "MMC rated at %0.2f%cF/%0.2f%cV", MINC*SIfactor(MINC), SIprefix(MINC), MINV*SIfactor(MINV), SIprefix(MINV));
+			center("\n|",string,width,' ',"|");
+			printf("\n+"); for ( par = 1; par <= width; par++ ) printf("-"); printf("+\n");
+			break;
+
+		}
 
 	return 0;
 
