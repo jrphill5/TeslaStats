@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.08"
+#define VERSION "1.09"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,10 +125,11 @@ int main()
 	SECWG = 26;   SECD  = 0.07;
 	SECH  = 0.30; TOPD  = 0.15;
 
+	// Calculate primary wire diameter from AWG value.
 	/* GOOD */ PRIWD = WD( PRIWG );
-	/* GOOD */ SECWD = WD( SECWG );
+	// Calculate primary wire diameter from AWG value taking into account insulation.
+	/* GOOD */ SECWD = WD( SECWG ) + 0.00003556;
 
-	// Take into account the wire insulation. (10%?)
 	/* GOOD */ SECN  = SECH / SECWD;         // Aspect ratio
 	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD); // Wire Length
 	SECL  = ( 0.25*SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / (4.5*(SECD+SECWD)+10.0*SECH) / 25.4 ) / 1000.0;
