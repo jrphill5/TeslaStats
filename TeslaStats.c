@@ -130,8 +130,8 @@ int main()
 	// Calculate primary wire diameter from AWG value taking into account insulation.
 	/* GOOD */ SECWD = WD( SECWG ) + 0.00003556;
 
-	/* GOOD */ SECN  = SECH / SECWD;         // Aspect ratio
-	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD); // Wire Length
+	/* GOOD */ SECN  = SECH / SECWD;                      // Secondary Wrap Number
+	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
 	SECL  = ( 0.25*SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / (4.5*(SECD+SECWD)+10.0*SECH) / 25.4 ) / 1000.0;
 
 	/* GOOD */ NSTTR = NSTVO / NSTVI;
@@ -148,24 +148,25 @@ int main()
 	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
 	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
 	/* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
-	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
-	/* GOOD */ LTRCS = PTCC * PHI;
-	/* WHY? */ LTRCR = PTCC * 0.83 * PI;
+	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );        // Resonant Capacitance
+	/* GOOD */ LTRCS = PTCC * PHI;                        // LTR Static Capacitance
+	/* WHY? */ LTRCR = PTCC * 0.83 * PI;                  // LTR Rotary Capacitance
 
-	SECF  = 0.25 * C0 / SECLN;
-	PTCCR = 1.0 / ( 2.0*PI*SECF*PTCC );
-	PRILR = PTCCR;
-	PRIL  = PRILR / ( 2.0*PI*SECF );
+	// Calculate primary inductance such that capacitive and inductive reactances cancel.
+	SECF  = 0.25 * C0 / SECLN;                            // Secondary Resonant Frequency
+	/* GOOD */ PTCCR = 1.0 / ( 2.0*PI*SECF*PTCC );        // Capacitive Reactance
+	/* GOOD */ PRILR = PTCCR;                             // Inductive Reactance
+	/* GOOD */ PRIL  = PRILR / ( 2.0*PI*SECF );           // Primary Inductance
 
-	TOPC  = 0.5 * TOPD / 9000000000;
+	PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*PTCC) );             // Primary Resonant Frequency
+	SECF  = PRIF;                                         // Secondary Resonant Frequency
+	PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);                    // Primary Length
 
-	PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*PTCC) );
-	SECF  = PRIF;
-	PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);
+	/* GOOD */ SECHD = SECH / ( SECD + SECWD );           // Aspect Ratio
+	/* GOOD */ SECC = medhurst(0.5*SECD, SECH);           // Secondary Self-Capacitance
+	TOPC  = 0.5 * TOPD / 9000000000;                      // Topload Capacitance
 
-	ARCLN = 0.04318*sqrt( NSTVA );
-	SECHD = SECH / ( SECD + SECWD );
-	SECC = medhurst(0.5*SECD, SECH);
+	ARCLN = 0.04318*sqrt( NSTVA );                        // Maximum Theroetical Arclength
 
 	center("\n","",w.ws_col,'=',"\n\n");
 	sprintf(name,"%s v%s",NAME,VERSION);
