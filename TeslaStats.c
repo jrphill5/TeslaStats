@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.07"
+#define VERSION "1.08"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,10 +70,11 @@ int main()
 
 	// Variables pertaining to the primary tank capacitor (PTC).
 	//  - PTCC:  Resonant capacitance for PTC expressed in farads.
-	//  - LTRC:  Larger than resonant capacitance for PTC expressed in farads.
+	//  - LTRCS: Larger than resonant capacitance for PTC with static spark gap expressed in farads.
+	//  - LTRCR: Larger than resonant capacitance for PTC with rotary spark gap expressed in farads.
 	//  - PTCCR: Capacitive reactance of PTC expressed in ohms.
 	//  - PRILR: Inductive reactance of PRI expressed in ohms.
-	float PTCCR, PTCC, LTRC, PRILR;
+	float PTCCR, PTCC, LTRCS, LTRCR, PRILR;
 
 	// Variables pertaining to the primary coil (PRI).
 	//  - PRIWG: American wire gauge of PRI.
@@ -128,8 +129,8 @@ int main()
 	/* GOOD */ SECWD = WD( SECWG );
 
 	// Take into account the wire insulation. (10%?)
-	/* GOOD */ SECN  = SECH / SECWD;
-	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD);
+	/* GOOD */ SECN  = SECH / SECWD;         // Aspect ratio
+	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD); // Wire Length
 	SECL  = ( 0.25*SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / (4.5*(SECD+SECWD)+10.0*SECH) / 25.4 ) / 1000.0;
 
 	/* GOOD */ NSTTR = NSTVO / NSTVI;
@@ -138,16 +139,17 @@ int main()
 	/* GOOD */ NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
 
 	// Calculate peak voltages and currents from RMS values.
-	NSTVIP = NSTVI * sqrt(2.0);
-	NSTIIP = NSTII * sqrt(2.0);
-	NSTVOP = NSTVO * sqrt(2.0);
-	NSTIOP = NSTIO * sqrt(2.0);
+	/* GOOD */ NSTVIP = NSTVI * sqrt(2.0);
+	/* GOOD */ NSTIIP = NSTII * sqrt(2.0);
+	/* GOOD */ NSTVOP = NSTVO * sqrt(2.0);
+	/* GOOD */ NSTIOP = NSTIO * sqrt(2.0);
 
 	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
 	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
     /* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
 	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
-	/* GOOD */ LTRC  = PTCC * PHI;
+	/* GOOD */ LTRCS = PTCC * PHI;
+	/* WHY? */ LTRCR = PTCC * 0.83 * PI;
 
 	SECF  = 0.25 * C0 / SECLN;
 	PTCCR = 1.0 / ( 2.0*PI*SECF*PTCC );
@@ -192,9 +194,10 @@ int main()
 	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
 	center("\n","Primary Tank Capacitor",w.ws_col,'=',"\n\n");
-	printf("  C Reactance:      %6.2f%cohm\n",  PTCCR* SIfactor(PTCCR), SIprefix(PTCCR));
+	printf("  Cap Reactance:    %6.2f%cohm\n",  PTCCR* SIfactor(PTCCR), SIprefix(PTCCR));
 	printf("  Res Capacitance:  %6.2f%cF\n",    PTCC*  SIfactor(PTCC),  SIprefix(PTCC));
-	printf("  LTR Capacitance:  %6.2f%cF\n",    LTRC*  SIfactor(LTRC),  SIprefix(LTRC));
+	printf("  LTR Static Cap:   %6.2f%cF\n",    LTRCS* SIfactor(LTRCS), SIprefix(LTRCS));
+	printf("  LTR Rotary Cap:   %6.2f%cF\n",    LTRCR* SIfactor(LTRCR), SIprefix(LTRCR));
 
 	center("\n","Primary Coil",w.ws_col,'=',"\n\n");
 	printf("  L Reactance:      %6.2f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
