@@ -127,7 +127,7 @@ int main()
 
 	// Calculate primary wire diameter from AWG value.
 	/* GOOD */ PRIWD = WD( PRIWG );
-	// Calculate primary wire diameter from AWG value taking into account insulation.
+	// Calculate secondary wire diameter from AWG value taking into account insulation.
 	/* RECHECK INSULATION VALUE */ SECWD = WD( SECWG ) + 0.00003556;
 
 	/* GOOD */ SECN  = SECH / SECWD;                      // Secondary Wrap Number
@@ -150,7 +150,7 @@ int main()
 	/* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
 	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );        // Resonant Capacitance
 	/* GOOD */ LTRCS = PTCC * PHI;                        // LTR Static Capacitance
-	/* WHY? */ LTRCR = PTCC * 0.83 * PI;                  // LTR Rotary Capacitance
+	/* WHY? */ LTRCR = PTCC * ( PHI + 1.0 );              // LTR Rotary Capacitance
 
 	// Calculate primary inductance such that capacitive and inductive reactances cancel.
 	SECF  = 0.25 * C0 / SECLN;                            // Secondary Resonant Frequency
