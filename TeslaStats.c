@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.06"
+#define VERSION "1.07"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,19 +48,25 @@ int main()
 	ioctl(0, TIOCGWINSZ, &w);
 
 	// Variables pertaining to the neon sign transformer (NST).
-	//  - NSTVI: Input voltage of NST expressed in volts.
-	//  - NSTII: Input current of NST expressed in amps.
-	//  - NSTF:  Input frequency of NST expressed in hertz.
-	//  - NSTVO: Output voltage of NST expressed in volts.
-	//  - NSTIO: Output current of NST expressed in amps.
-	//  - NSTVA: Power draw of NST expressed in volt-amps.
-	//  - NSTTR: Transformer coil turn ratio of NST.
-	//  - NSTZ:  Impedance of NST expressed in ohms.
-	//  - NSTR:  Total resistive reactance of NST expressed in ohms.
-	//  - NSTRP: Resistance of the NST primary expressed in ohms.
-	//  - NSTRS: Resistance of the NST secondary expressed in ohms.
-	//  - NSTPF: Power factor correction capacitance for NST expressed in farads.
-	float NSTVI, NSTII, NSTF, NSTVO, NSTIO, NSTVA, NSTTR, NSTZ, NSTR, NSTRP, NSTRS, NSTPF;
+	//  - NSTVI:  RMS input voltage of NST expressed in volts.
+	//  - NSTVIP: Peak input voltage of NST expressed in volts.
+	//  - NSTII:  RMS input current of NST expressed in amps.
+	//  - NSTIIP: Peak input current of NST expressed in amps.
+	//  - NSTVO:  RMS output voltage of NST expressed in volts.
+	//  - NSTVOP: Peak output voltage of NST expressed in volts.
+	//  - NSTIO:  RMS output current of NST expressed in amps.
+	//  - NSTIOP: Peak output current of NST expressed in amps.
+	//  - NSTF:   Input frequency of NST expressed in hertz.
+	//  - NSTVA:  Power draw of NST expressed in volt-amps.
+	//  - NSTTR:  Transformer coil turn ratio of NST.
+	//  - NSTZ:   Impedance of NST expressed in ohms.
+	//  - NSTR:   Total resistive reactance of NST expressed in ohms.
+	//  - NSTRP:  Resistance of the NST primary expressed in ohms.
+	//  - NSTRS:  Resistance of the NST secondary expressed in ohms.
+	//  - NSTPF:  Power factor correction capacitance for NST expressed in farads.
+	float NSTVI, NSTVIP, NSTII, NSTIIP;
+	float NSTVO, NSTVOP, NSTIO, NSTIOP;
+	float NSTF, NSTVA, NSTTR, NSTZ, NSTR, NSTRP, NSTRS, NSTPF;
 
 	// Variables pertaining to the primary tank capacitor (PTC).
 	//  - PTCC:  Resonant capacitance for PTC expressed in farads.
@@ -131,6 +137,12 @@ int main()
 	/* GOOD */ NSTII = NSTVA / NSTVI;
 	/* GOOD */ NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
 
+	// Calculate peak voltages and currents from RMS values.
+	NSTVIP = NSTVI * sqrt(2.0);
+	NSTIIP = NSTII * sqrt(2.0);
+	NSTVOP = NSTVO * sqrt(2.0);
+	NSTIOP = NSTIO * sqrt(2.0);
+
 	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
 	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
     /* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
@@ -158,13 +170,24 @@ int main()
 	center("",AUTHOR,w.ws_col,' ',"\n");
 
 	center("\n","Neon Sign Transformer",w.ws_col,'=',"\n\n");
-	printf("  Input Voltage:    %6.2f%cV\n",    NSTVI* SIfactor(NSTVI), SIprefix(NSTVI));
-	printf("  Input Current:    %6.2f%cA\n",    NSTII* SIfactor(NSTII), SIprefix(NSTII));
-	printf("  Input Frequency:  %6.2f%cHz\n",   NSTF*  SIfactor(NSTF),  SIprefix(NSTF));
-	printf("  Output Voltage:   %6.2f%cV\n",    NSTVO* SIfactor(NSTVO), SIprefix(NSTVO));
-	printf("  Output Current:   %6.2f%cA\n",    NSTIO* SIfactor(NSTIO), SIprefix(NSTIO));
-	printf("  Power:            %6.2f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
+	printf("  Input (RMS):      %6.2f%cV %6.2f%cA %6.2f%cHz\n",
+		NSTVI*  SIfactor(NSTVI),  SIprefix(NSTVI),
+		NSTII*  SIfactor(NSTII),  SIprefix(NSTII),
+		NSTF*   SIfactor(NSTF),   SIprefix(NSTF));
+	printf("  Input (Peak):     %6.2f%cV %6.2f%cA %6.2f%cHz\n",
+		NSTVIP* SIfactor(NSTVIP), SIprefix(NSTVIP),
+		NSTIIP* SIfactor(NSTIIP), SIprefix(NSTIIP),
+		NSTF*   SIfactor(NSTF),   SIprefix(NSTF));
+	printf("  Output (RMS):     %6.2f%cV %6.2f%cA %6.2f%cHz\n",
+		NSTVO*  SIfactor(NSTVO),  SIprefix(NSTVO),
+		NSTIO*  SIfactor(NSTIO),  SIprefix(NSTIO),
+		NSTF*   SIfactor(NSTF),   SIprefix(NSTF));
+	printf("  Output (Peak):    %6.2f%cV %6.2f%cA %6.2f%cHz\n",
+		NSTVOP* SIfactor(NSTVOP), SIprefix(NSTVOP),
+		NSTIOP* SIfactor(NSTIOP), SIprefix(NSTIOP),
+		NSTF*   SIfactor(NSTF),   SIprefix(NSTF));
 	printf("  Step-up Ratio:    %6.2f:1\n",     NSTTR);
+	printf("  Power:            %6.2f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
 	printf("  PFC Capacitance:  %6.2f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
 	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
 
