@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.05"
+#define VERSION "1.06"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,8 +56,11 @@ int main()
 	//  - NSTVA: Power draw of NST expressed in volt-amps.
 	//  - NSTTR: Transformer coil turn ratio of NST.
 	//  - NSTZ:  Impedance of NST expressed in ohms.
+	//  - NSTR:  Total resistive reactance of NST expressed in ohms.
+	//  - NSTRP: Resistance of the NST primary expressed in ohms.
+	//  - NSTRS: Resistance of the NST secondary expressed in ohms.
 	//  - NSTPF: Power factor correction capacitance for NST expressed in farads.
-	float NSTVI, NSTII, NSTF, NSTVO, NSTIO, NSTVA, NSTTR, NSTZ, NSTPF;
+	float NSTVI, NSTII, NSTF, NSTVO, NSTIO, NSTVA, NSTTR, NSTZ, NSTR, NSTRP, NSTRS, NSTPF;
 
 	// Variables pertaining to the primary tank capacitor (PTC).
 	//  - PTCC:  Resonant capacitance for PTC expressed in farads.
@@ -109,6 +112,7 @@ int main()
 	// Define values for the parameters of the Tesla coil.
 	NSTVI = 120;  NSTF  = 60;
 	NSTVO = 9000; NSTIO = 0.030;
+	NSTRP = 1.7;  NSTRS = 13000;
 	PRIWG = 12;   PRIN  = 10;
 	PRIDI = 0.1;  PRIDO = 0.649;
 	SECWG = 26;   SECD  = 0.07;
@@ -127,7 +131,9 @@ int main()
 	/* GOOD */ NSTII = NSTVA / NSTVI;
 	/* GOOD */ NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
 
-	/* GOOD */ NSTZ  = NSTVO / NSTIO;
+	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
+	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
+    /* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
 	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
 	/* GOOD */ LTRC  = PTCC * PHI;
 
