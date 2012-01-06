@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.10"
+#define VERSION "1.11"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,7 +113,7 @@ int main()
 	PI  = 3.1415926535897932384626433832795;
 	PHI = 0.5 * ( 1.0 + sqrt(5.0) );
 	C0  = 299792458;
-	U0  = 0.0000004*PI;
+	U0  = 4.0e-7 * PI;
 	E0  = 1.0 / ( U0*C0*C0 );
 
 	// Define values for the parameters of the Tesla coil.
@@ -127,12 +127,21 @@ int main()
 
 	// Calculate primary wire diameter from AWG value.
 	/* GOOD */ PRIWD = WD( PRIWG );
-	// Calculate secondary wire diameter from AWG value taking into account insulation.
-	/* RECHECK INSULATION VALUE */ SECWD = WD( SECWG ) + 0.00003556;
+	// Calculate secondary wire diameter from AWG value accounting for single insulation.
+	// Single insulation: 0.0014in 3.55600e-5m
+	// Double insulation: 0.0026in 6.60400e-5m
+	/* GOOD */ SECWD = WD( SECWG ) + 3.55600e-5;
 
 	/* GOOD */ SECN  = SECH / SECWD;                      // Secondary Wrap Number
 	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
-	SECL  = ( 0.25*SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / (4.5*(SECD+SECWD)+10.0*SECH) / 25.4 ) / 1000.0;
+
+	// Calculate inductance of secondary using Wheeler's empirical formula.
+	// Accurate to within 1% for SECL > 0.4*SECD. 
+	/* GOOD */ SECL  = SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / ( 2.54e4 * (18.0*(SECD+SECWD)+40.0*SECH) );
+
+	// Calculate inductance of secondary using theoretical solenoid equation.
+	// Implement Nagaoka coefficient to increase accuracy.
+	//SECL  = 0.25*PI*U0*SECN*SECN*(SECD+SECWD)*(SECD+SECWD)/SECH;
 
 	/* GOOD */ NSTTR = NSTVO / NSTVI;
 	/* GOOD */ NSTVA = NSTVO * NSTIO;
