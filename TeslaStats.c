@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.11"
+#define VERSION "1.12"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -161,19 +161,24 @@ int main()
 	/* GOOD */ LTRCS = PTCC * PHI;                        // LTR Static Capacitance
 	/* WHY? */ LTRCR = PTCC * ( PHI + 1.0 );              // LTR Rotary Capacitance
 
-	// Calculate primary inductance such that capacitive and inductive reactances cancel.
-	SECF  = 0.25 * C0 / SECLN;                            // Secondary Resonant Frequency
-	/* GOOD */ PTCCR = 1.0 / ( 2.0*PI*SECF*PTCC );        // Capacitive Reactance
-	/* GOOD */ PRILR = PTCCR;                             // Inductive Reactance
-	/* GOOD */ PRIL  = PRILR / ( 2.0*PI*SECF );           // Primary Inductance
+	// Calculate resonant frequency of the system.
+	/* GOOD */ SECC = medhurst(0.5*SECD, SECH);           // Secondary Self-Capacitance
+	/* GOOD */ TOPC  = 2.0 * PI * E0 * TOPD;              // Topload Capacitance
+	// Estimate the secondary resonant frequency.
+	SECF  = 0.25 * C0 / SECLN;
+	// Calculate the resonant frequency of the secondary circuit.
+	SECF  = 1.0 / ( 2.0 * PI * sqrt( SECL * ( SECC + TOPC ) ) );
+	PRIF  = SECF;
 
-	PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*PTCC) );             // Primary Resonant Frequency
-	SECF  = PRIF;                                         // Secondary Resonant Frequency
+	// Calculate primary inductance such that capacitive and inductive reactances cancel.
+	// Assume use of LTR static capacitor bank.
+	/* GOOD */ PTCCR = 1.0 / ( 2.0*PI*PRIF*LTRCS );       // Capacitive Reactance
+	/* GOOD */ PRILR = PTCCR;                             // Inductive Reactance
+	/* GOOD */ PRIL  = PRILR / ( 2.0*PI*PRIF );           // Primary Inductance
+	//PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*LTRCS) );          // Primary Resonant Frequency
 	PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);                    // Primary Length
 
 	/* GOOD */ SECHD = SECH / ( SECD + SECWD );           // Aspect Ratio
-	/* GOOD */ SECC = medhurst(0.5*SECD, SECH);           // Secondary Self-Capacitance
-	/* GOOD */ TOPC  = 2.0 * PI * E0 * TOPD;              // Topload Capacitance
 
 	ARCLN = 0.04318*sqrt( NSTVA );                        // Maximum Theroetical Arclength
 
