@@ -147,7 +147,7 @@ int main()
 
 	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
 	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
-    /* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
+	/* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
 	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );
 	/* GOOD */ LTRCS = PTCC * PHI;
 	/* WHY? */ LTRCR = PTCC * 0.83 * PI;
