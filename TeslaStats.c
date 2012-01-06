@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.09"
+#define VERSION "1.10"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -128,7 +128,7 @@ int main()
 	// Calculate primary wire diameter from AWG value.
 	/* GOOD */ PRIWD = WD( PRIWG );
 	// Calculate primary wire diameter from AWG value taking into account insulation.
-	/* GOOD */ SECWD = WD( SECWG ) + 0.00003556;
+	/* RECHECK INSULATION VALUE */ SECWD = WD( SECWG ) + 0.00003556;
 
 	/* GOOD */ SECN  = SECH / SECWD;                      // Secondary Wrap Number
 	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
@@ -164,7 +164,7 @@ int main()
 
 	/* GOOD */ SECHD = SECH / ( SECD + SECWD );           // Aspect Ratio
 	/* GOOD */ SECC = medhurst(0.5*SECD, SECH);           // Secondary Self-Capacitance
-	TOPC  = 0.5 * TOPD / 9000000000;                      // Topload Capacitance
+	/* GOOD */ TOPC  = 2.0 * PI * E0 * TOPD;              // Topload Capacitance
 
 	ARCLN = 0.04318*sqrt( NSTVA );                        // Maximum Theroetical Arclength
 
