@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.13"
+#define VERSION "1.14"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,17 +30,17 @@ extern double SIfactor( double value );
 extern char SIprefix( double value );
 
 // Formats and centers text.
-//  - begin: The string to be printed at beginning of line.
-//  - text:  The text to be centered.
-//  - col:   The number of columns the text will be centered in.
-//  - pad:   The padding character use for centering.
-//  - end:   The string to be printed at end of line.
 extern void center( char* begin, char* text, int col, char pad, char* end );
 
-void input( char* description, float* value, char* unit );
+// Control the input and output of parameter values.
+void input(  char* description, float* value, char* unit );
+void output( char* description, float* value, char* unit );
 
 int main()
 {
+
+	// Determine whether program should run in dev mode.
+	const int devel = 1;
 
 	// Holds information about program.
 	char name[strlen(NAME)+strlen(VERSION)+2];
@@ -128,77 +128,83 @@ int main()
 	SECH  = 0.30; TOPD  = 0.15;
 
 	// Prompt user to input parameters of coil.
-	input( "Transformer Input Voltage       ", &NSTVI, "V"   );
-	input( "Transformer Input Frequency     ", &NSTF,  "Hz"  );
-	input( "Transformer Output Voltage      ", &NSTVO, "V"   );
-	input( "Transformer Output Current      ", &NSTIO, "A"   );
-	input( "Transformer Primary Resistance  ", &NSTRP, "ohm" );
-	input( "Transformer Secondary Resistance", &NSTRS, "ohm" );
-	input( "Primary Coil Wire Gauge         ", &PRIWG, "AWG" );
-	input( "Primary Coil Wire Turns         ", &PRIN,  ""    );
-	input( "Primary Coil Inner Diameter     ", &PRIDI, "m"   );
-	input( "Primary Coil Outer Diameter     ", &PRIDO, "m"   );
-	input( "Secondary Coil Wire Gauge       ", &SECWG, "AWG" );
-	input( "Secondary Coil Form Diameter    ", &SECD, "m"   );
-	input( "Secondary Coil Form Height      ", &SECH, "m"   );
-	input( "Topload Sphere Diameter         ", &TOPD, "m"   );
+	if ( devel == 0 )
+	{
+
+		input( "Transformer Input Voltage       ", &NSTVI, "V"   );
+		input( "Transformer Input Frequency     ", &NSTF,  "Hz"  );
+		input( "Transformer Output Voltage      ", &NSTVO, "V"   );
+		input( "Transformer Output Current      ", &NSTIO, "A"   );
+		input( "Transformer Primary Resistance  ", &NSTRP, "ohm" );
+		input( "Transformer Secondary Resistance", &NSTRS, "ohm" );
+		input( "Primary Coil Wire Gauge         ", &PRIWG, "AWG" );
+		input( "Primary Coil Wire Turns         ", &PRIN,  ""    );
+		input( "Primary Coil Inner Diameter     ", &PRIDI, "m"   );
+		input( "Primary Coil Outer Diameter     ", &PRIDO, "m"   );
+		input( "Secondary Coil Wire Gauge       ", &SECWG, "AWG" );
+		input( "Secondary Coil Form Diameter    ", &SECD,  "m"   );
+		input( "Secondary Coil Form Height      ", &SECH,  "m"   );
+		input( "Topload Sphere Diameter         ", &TOPD,  "m"   );
+
+	}
 
 	// Calculate primary wire diameter from AWG value.
-	/* GOOD */ PRIWD = WD( PRIWG );
+	PRIWD = WD( PRIWG );
 	// Calculate secondary wire diameter from AWG value accounting for single insulation.
 	// Single insulation: 0.0014in 3.55600e-5m
 	// Double insulation: 0.0026in 6.60400e-5m
-	/* GOOD */ SECWD = WD( SECWG ) + 3.55600e-5;
+	SECWD = WD( SECWG ) + 3.55600e-5;
 
-	/* GOOD */ SECN  = SECH / SECWD;                      // Secondary Wrap Number
-	/* GOOD */ SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
+	SECN  = SECH / SECWD;                      // Secondary Wrap Number
+	SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
 
 	// Calculate inductance of secondary using Wheeler's empirical formula.
 	// Accurate to within 1% for SECL > 0.4*SECD. 
-	/* GOOD */ SECL  = SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / ( 2.54e4 * (18.0*(SECD+SECWD)+40.0*SECH) );
+	SECL  = SECN*SECN*(SECD+SECWD)*(SECD+SECWD) / ( 2.54e4 * (18.0*(SECD+SECWD)+40.0*SECH) );
 
 	// Calculate inductance of secondary using theoretical solenoid equation.
 	// Implement Nagaoka coefficient to increase accuracy.
 	//SECL  = 0.25*PI*U0*SECN*SECN*(SECD+SECWD)*(SECD+SECWD)/SECH;
 
-	/* GOOD */ NSTTR = NSTVO / NSTVI;
-	/* GOOD */ NSTVA = NSTVO * NSTIO;
-	/* GOOD */ NSTII = NSTVA / NSTVI;
-	/* GOOD */ NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
+	// Calculate transformer power performance statistics.
+	NSTTR = NSTVO / NSTVI;
+	NSTVA = NSTVO * NSTIO;
+	NSTII = NSTVA / NSTVI;
+	NSTPF = NSTVA / ( 2.0*PI*NSTF*NSTVI*NSTVI );
 
 	// Calculate peak voltages and currents from RMS values.
-	/* GOOD */ NSTVIP = NSTVI * sqrt(2.0);
-	/* GOOD */ NSTIIP = NSTII * sqrt(2.0);
-	/* GOOD */ NSTVOP = NSTVO * sqrt(2.0);
-	/* GOOD */ NSTIOP = NSTIO * sqrt(2.0);
+	NSTVIP = NSTVI * sqrt(2.0);
+	NSTIIP = NSTII * sqrt(2.0);
+	NSTVOP = NSTVO * sqrt(2.0);
+	NSTIOP = NSTIO * sqrt(2.0);
 
-	/* GOOD */ NSTZ  = NSTVO / NSTIO;                     // Impedance
-	/* GOOD */ NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;     // Reactance
-	/* SIGN */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
-	/* GOOD */ PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );        // Resonant Capacitance
-	/* GOOD */ LTRCS = PTCC * PHI;                        // LTR Static Capacitance
-	/* WHY? */ LTRCR = PTCC * ( PHI + 1.0 );              // LTR Rotary Capacitance
+	NSTZ  = NSTVO / NSTIO;                                 // Impedance
+	NSTR  = NSTRS + NSTRP * NSTTR * NSTTR;                 // Reactance
+	/* SIGN? */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
+	PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );                    // Resonant Capacitance
+	LTRCS = PTCC * PHI;                                    // LTR Static Capacitance
+	/* WHY?  */ LTRCR = PTCC * ( PHI + 1.0 );              // LTR Rotary Capacitance
 
 	// Calculate resonant frequency of the system.
-	/* GOOD */ SECC = medhurst(0.5*SECD, SECH);           // Secondary Self-Capacitance
-	/* GOOD */ TOPC  = 2.0 * PI * E0 * TOPD;              // Topload Capacitance
+	SECC = medhurst(0.5*SECD, SECH);                       // Secondary Self-Capacitance
+	TOPC  = 2.0 * PI * E0 * TOPD;                          // Topload Capacitance
 	// Estimate the secondary resonant frequency.
-	SECF  = 0.25 * C0 / SECLN;
+	/* VERIFY */ SECF  = 0.25 * C0 / SECLN;
 	// Calculate the resonant frequency of the secondary circuit.
 	SECF  = 1.0 / ( 2.0 * PI * sqrt( SECL * ( SECC + TOPC ) ) );
 	PRIF  = SECF;
 
 	// Calculate primary inductance such that capacitive and inductive reactances cancel.
 	// Assume use of LTR static capacitor bank.
-	/* GOOD */ PTCCR = 1.0 / ( 2.0*PI*PRIF*LTRCS );       // Capacitive Reactance
-	/* GOOD */ PRILR = PTCCR;                             // Inductive Reactance
-	/* GOOD */ PRIL  = PRILR / ( 2.0*PI*PRIF );           // Primary Inductance
-	//PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*LTRCS) );          // Primary Resonant Frequency
-	PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);                    // Primary Length
+	PTCCR = 1.0 / ( 2.0*PI*PRIF*LTRCS );                   // Capacitive Reactance
+	PRILR = PTCCR;                                         // Inductive Reactance
+	PRIL  = PRILR / ( 2.0*PI*PRIF );                       // Primary Inductance
+	//PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*LTRCS) );           // Primary Resonant Frequency
+	/* VERIFY */ PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);        // Primary Coil Length
 
-	/* GOOD */ SECHD = SECH / ( SECD + SECWD );           // Aspect Ratio
+	SECHD = SECH / ( SECD + SECWD );                       // Aspect Ratio
 
-	ARCLN = 0.04318*sqrt( NSTVA );                        // Maximum Theroetical Arclength
+	/* VERIFY */ ARCLN = 0.04318*sqrt( NSTVA );            // Maximum Theroetical Arclength
 
 	center("\n","",w.ws_col,'=',"\n\n");
 	sprintf(name,"%s v%s",NAME,VERSION);
@@ -222,44 +228,44 @@ int main()
 		NSTVOP* SIfactor(NSTVOP), SIprefix(NSTVOP),
 		NSTIOP* SIfactor(NSTIOP), SIprefix(NSTIOP),
 		NSTF*   SIfactor(NSTF),   SIprefix(NSTF));
-	printf("  Step-up Ratio:    %6.2f:1\n",     NSTTR);
-	printf("  Power:            %6.2f%cW\n",    NSTVA* SIfactor(NSTVA), SIprefix(NSTVA));
-	printf("  PFC Capacitance:  %6.2f%cF\n",    NSTPF* SIfactor(NSTPF), SIprefix(NSTPF));
-	printf("  Impedance:        %6.2f%cohm\n",  NSTZ*  SIfactor(NSTZ),  SIprefix(NSTZ));
+	output("Step-up Ratio:   ", &NSTTR, ""   );
+	output("Power:           ", &NSTVA, "VA" );
+	output("PFC Capacitance: ", &NSTPF, "F"  );
+	output("Impedance:       ", &NSTZ,  "ohm");
 
 	center("\n","Primary Tank Capacitor",w.ws_col,'=',"\n\n");
-	printf("  Cap Reactance:    %6.2f%cohm\n",  PTCCR* SIfactor(PTCCR), SIprefix(PTCCR));
-	printf("  Res Capacitance:  %6.2f%cF\n",    PTCC*  SIfactor(PTCC),  SIprefix(PTCC));
-	printf("  LTR Static Cap:   %6.2f%cF\n",    LTRCS* SIfactor(LTRCS), SIprefix(LTRCS));
-	printf("  LTR Rotary Cap:   %6.2f%cF\n",    LTRCR* SIfactor(LTRCR), SIprefix(LTRCR));
+	output("Cap Reactance:   ", &PTCCR, "ohm");
+	output("Res Capacitance: ", &PTCC,  "F"  );
+	output("LTR Static Cap:  ", &LTRCS, "F"  );
+	output("LTR Rotary Cap:  ", &LTRCR, "F"  );
 
 	center("\n","Primary Coil",w.ws_col,'=',"\n\n");
-	printf("  L Reactance:      %6.2f%cohm\n",  PRILR* SIfactor(PRILR), SIprefix(PRILR));
-	printf("  Wire Gauge:       %6.2f AWG\n",   PRIWG);
-	printf("  Wire Diameter:    %6.2f%cm\n",    PRIWD* SIfactor(PRIWD), SIprefix(PRIWD));
-	printf("  Wire Length:      %6.2f%cm\n",    PRILN* SIfactor(PRILN), SIprefix(PRILN));
-	printf("  Wire Turns:       %6.2f turns\n", PRIN);
-	printf("  Inductance:       %6.2f%cH\n",    PRIL*  SIfactor(PRIL),  SIprefix(PRIL));
-	printf("  Frequency:        %6.2f%cHz\n",   PRIF*  SIfactor(PRIF),  SIprefix(PRIF));
+	output("L Reactance:     ", &PRILR, "ohm");
+	output("Wire Gauge:      ", &PRIWG, "AWG");
+	output("Wire Diameter:   ", &PRIWD, "m"  );
+	output("Wire Length:     ", &PRILN, "m"  );
+	output("Wire Turns:      ", &PRIN,  ""   );
+	output("Inductance:      ", &PRIL,  "H"  );
+	output("Res Frequency:   ", &PRIF,  "Hz" );
 
 	center("\n","Secondary Coil",w.ws_col,'=',"\n\n");
-	printf("  Form Diameter:    %6.2f%cm\n",    SECD*  SIfactor(SECD),  SIprefix(SECD));
-	printf("  Form Height:      %6.2f%cm\n",    SECH*  SIfactor(SECH),  SIprefix(SECH));
-	printf("  Aspect Ratio:     %6.2f:1\n",     SECHD);
-	printf("  Wire Gauge:       %6.2f AWG\n",   SECWG);
-	printf("  Wire Diameter:    %6.2f%cm\n",    SECWD* SIfactor(SECWD), SIprefix(SECWD));
-	printf("  Wire Length:      %6.2f%cm\n",    SECLN* SIfactor(SECLN), SIprefix(SECLN));
-	printf("  Wire Turns:       %6.2f turns\n", SECN);
-	printf("  Inductance:       %6.2f%cH\n",    SECL*  SIfactor(SECL),  SIprefix(SECL));
-	printf("  Capacitance:      %6.2f%cF\n",    SECC*  SIfactor(SECC),  SIprefix(SECC));
-	printf("  Frequency:        %6.2f%cHz\n",   SECF*  SIfactor(SECF),  SIprefix(SECF));
+	output("Form Diameter:   ", &SECD,  "m"  );
+	output("Form Height:     ", &SECH,  "m"  );
+	output("Aspect Ratio:    ", &SECHD, ""   );
+	output("Wire Gauge:      ", &SECWG, "AWG");
+	output("Wire Diameter:   ", &SECWD, "m"  );
+	output("Wire Length:     ", &SECLN, "m"  );
+	output("Wire Turns:      ", &SECN,  ""   );
+	output("Inductance:      ", &SECL,  "H"  );
+	output("Capacitance:     ", &SECC,  "F"  );
+	output("Res Frequency:   ", &SECF,  "Hz" );
 
 	center("\n","Spherical Top Load",w.ws_col,'=',"\n\n");
-	printf("  Diameter:         %6.2f%cm\n",    TOPD*  SIfactor(TOPD),  SIprefix(TOPD));
-	printf("  Capacitance:      %6.2f%cF\n",    TOPC*  SIfactor(TOPC),  SIprefix(TOPC));
+	output("Diameter:        ", &TOPD,  "m"  );
+	output("Capacitance:     ", &TOPC,  "F"  );
 
 	center("\n","Miscellaneous",w.ws_col,'=',"\n\n");
-	printf("  Arc Length (max): %6.2f%cm\n",    ARCLN* SIfactor(ARCLN), SIprefix(ARCLN));
+	output("Arc Length (max):", &ARCLN, "m"  );
 
 	center("\n","",w.ws_col,'=',"\n\n");
 
@@ -289,5 +295,12 @@ void input( char* description, float* value, char* unit )
 	fgets(enteredString, sizeof enteredString, stdin);
 	if (strlen(enteredString) != 0) sprintf(defaultString,"%s%c%s",enteredString,SIprefix(*value),unit);
 	sscanf(defaultString,"%f%c%c\n",*&value,&dum,&dum);
+
+}
+
+void output( char* description, float* value, char* unit )
+{
+
+	printf("  %s %6.2f%c%s\n", description, *value*SIfactor(*value), SIprefix(*value), unit);
 
 }
