@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.12"
+#define VERSION "1.13"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +36,8 @@ extern char SIprefix( double value );
 //  - pad:   The padding character use for centering.
 //  - end:   The string to be printed at end of line.
 extern void center( char* begin, char* text, int col, char pad, char* end );
+
+void input( char* description, float* value, char* unit );
 
 int main()
 {
@@ -116,7 +118,7 @@ int main()
 	U0  = 4.0e-7 * PI;
 	E0  = 1.0 / ( U0*C0*C0 );
 
-	// Define values for the parameters of the Tesla coil.
+	// Define default values for the parameters of the Tesla coil.
 	NSTVI = 120;  NSTF  = 60;
 	NSTVO = 9000; NSTIO = 0.030;
 	NSTRP = 1.7;  NSTRS = 13000;
@@ -124,6 +126,22 @@ int main()
 	PRIDI = 0.1;  PRIDO = 0.649;
 	SECWG = 26;   SECD  = 0.07;
 	SECH  = 0.30; TOPD  = 0.15;
+
+	// Prompt user to input parameters of coil.
+	input( "Transformer Input Voltage       ", &NSTVI, "V"   );
+	input( "Transformer Input Frequency     ", &NSTF,  "Hz"  );
+	input( "Transformer Output Voltage      ", &NSTVO, "V"   );
+	input( "Transformer Output Current      ", &NSTIO, "A"   );
+	input( "Transformer Primary Resistance  ", &NSTRP, "ohm" );
+	input( "Transformer Secondary Resistance", &NSTRS, "ohm" );
+	input( "Primary Coil Wire Gauge         ", &PRIWG, "AWG" );
+	input( "Primary Coil Wire Turns         ", &PRIN,  ""    );
+	input( "Primary Coil Inner Diameter     ", &PRIDI, "m"   );
+	input( "Primary Coil Outer Diameter     ", &PRIDO, "m"   );
+	input( "Secondary Coil Wire Gauge       ", &SECWG, "AWG" );
+	input( "Secondary Coil Form Diameter    ", &SECD, "m"   );
+	input( "Secondary Coil Form Height      ", &SECH, "m"   );
+	input( "Topload Sphere Diameter         ", &TOPD, "m"   );
 
 	// Calculate primary wire diameter from AWG value.
 	/* GOOD */ PRIWD = WD( PRIWG );
@@ -256,5 +274,20 @@ float medhurst( float R, float L )
 {
 
 	return ( 1/0.0254 * (0.29*L + R * ( 0.41 + 1.94*sqrt(R / L) ) ) ) / 1000000000000.0;
+
+}
+
+void input( char* description, float* value, char* unit )
+{
+
+	char dum;
+	char defaultString[10];
+	char enteredString[10];
+
+	sprintf(defaultString,"%6.2f%c%-3s",*value*SIfactor(*value),SIprefix(*value),unit);
+	printf("%s [%s]: ", description, defaultString);
+	fgets(enteredString, sizeof enteredString, stdin);
+	if (strlen(enteredString) != 0) sprintf(defaultString,"%s%c%s",enteredString,SIprefix(*value),unit);
+	sscanf(defaultString,"%f%c%c\n",*&value,&dum,&dum);
 
 }
