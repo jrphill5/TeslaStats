@@ -122,10 +122,10 @@ int main()
 	NSTVI = 120;  NSTF  = 60;
 	NSTVO = 9000; NSTIO = 0.030;
 	NSTRP = 1.7;  NSTRS = 13000;
-	PRIWG = 12;   PRIN  = 10;
-	PRIDI = 0.1;  PRIDO = 0.649;
-	SECWG = 26;   SECD  = 0.07;
-	SECH  = 0.30; TOPD  = 0.15;
+	PRIWG = 12;   PRIN  = 7;
+	PRIDI = 0.1;  PRIDO = 0.38;
+	SECWG = 26;   SECD  = 0.06;
+	SECH  = 0.47; TOPD  = 0.15;
 
 	// Prompt user to input parameters of coil.
 	if ( devel == 0 )
