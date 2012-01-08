@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.14"
+#define VERSION "1.15"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,13 +81,14 @@ int main()
 	// Variables pertaining to the primary coil (PRI).
 	//  - PRIWG: American wire gauge of PRI.
 	//  - PRIWD: Wire diameter of PRI expressed in meters.
-	//  - PRIDI: Inner diameter of PRI expressed in meters.
-	//  - PRIDO: Outer diameter of PRI expressed in meters.
+	//  - PRIRI: Inner radius of PRI expressed in meters.
+	//  - PRIRO: Outer radius of PRI expressed in meters.
+	//  - PRIS:  Separation of PRI wrappings expressed in meters.
 	//  - PRIF:  Resonant frequency of PRI expressed in Hertz.
 	//  - PRILN: Length of PRI expressed in meters.
 	//  - PRIL:  Inductance of PRI expressed in Henries.
 	//  - PRIN:  Number of turns of wire in PRI.
-	float PRIWG, PRIWD, PRIRI, PRIS, PRIF, PRILN, PRIL, PRIN;
+	float PRIWG, PRIWD, PRIRI, PRIRO, PRIS, PRIF, PRILN, PRIL, PRIN;
 
 	// Variables pertaining to the secondary coil (SEC).
 	//  - SECWG: American wire gauge of SEC.
@@ -154,6 +155,9 @@ int main()
 	// Single insulation: 0.0014in 3.55600e-5m
 	// Double insulation: 0.0026in 6.60400e-5m
 	SECWD = WD( SECWG ) + 3.55600e-5;
+
+	// Calculate outer diameter of PRI.
+	PRIRO = PRIRI + PRIN * PRIS;               // Primary Outer Radius
 
 	SECN  = SECH / SECWD;                      // Secondary Wrap Number
 	SECLN = SECN*PI*(SECD+SECWD);              // Secondary Wire Length
@@ -244,8 +248,11 @@ int main()
 	output("L Reactance:     ", &PRILR, "ohm");
 	output("Wire Gauge:      ", &PRIWG, "AWG");
 	output("Wire Diameter:   ", &PRIWD, "m"  );
-	output("Wire Length:     ", &PRILN, "m"  );
 	output("Wire Turns:      ", &PRIN,  ""   );
+	output("Wire Length:     ", &PRILN, "m"  );
+	output("Inner Radius:    ", &PRIRI, "m"  );
+	output("Winding Sep:     ", &PRIS,  "m"  );
+	output("Outer Radius:    ", &PRIRO, "m"  );
 	output("Inductance:      ", &PRIL,  "H"  );
 	output("Res Frequency:   ", &PRIF,  "Hz" );
 
