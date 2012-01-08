@@ -7,8 +7,7 @@
 #include <math.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include "center.c"
-#include "SI.c"
+#include "Shared.c"
 
 // Global constants and ratios.
 //  - PI:  Ratio of circumference to diameter of a circle.
@@ -187,7 +186,7 @@ int main()
 	/* SIGN? */ NSTZ  = sqrt( NSTZ * NSTZ - NSTR * NSTR ); // Total Impedance
 	PTCC  = 1.0 / ( 2.0*PI*NSTF*NSTZ );                    // Resonant Capacitance
 	LTRCS = PTCC * PHI;                                    // LTR Static Capacitance
-	/* WHY?  */ LTRCR = PTCC * ( PHI + 1.0 );              // LTR Rotary Capacitance
+	LTRCR = PTCC * PHI * PHI;                              // LTR Rotary Capacitance
 
 	// Calculate resonant frequency of the system.
 	SECC = medhurst(0.5*SECD, SECH);                       // Secondary Self-Capacitance
