@@ -87,7 +87,7 @@ int main()
 	//  - PRILN: Length of PRI expressed in meters.
 	//  - PRIL:  Inductance of PRI expressed in Henries.
 	//  - PRIN:  Number of turns of wire in PRI.
-	float PRIWG, PRIWD, PRIDI, PRIDO, PRIF, PRILN, PRIL, PRIN;
+	float PRIWG, PRIWD, PRIRI, PRIS, PRIF, PRILN, PRIL, PRIN;
 
 	// Variables pertaining to the secondary coil (SEC).
 	//  - SECWG: American wire gauge of SEC.
@@ -123,7 +123,7 @@ int main()
 	NSTVO = 9000; NSTIO = 0.030;
 	NSTRP = 1.7;  NSTRS = 13000;
 	PRIWG = 12;   PRIN  = 7;
-	PRIDI = 0.1;  PRIDO = 0.38;
+	PRIRI = 0.05; PRIS  = 0.02;
 	SECWG = 26;   SECD  = 0.06;
 	SECH  = 0.47; TOPD  = 0.15;
 
@@ -139,8 +139,8 @@ int main()
 		input( "Transformer Secondary Resistance", &NSTRS, "ohm" );
 		input( "Primary Coil Wire Gauge         ", &PRIWG, "AWG" );
 		input( "Primary Coil Wire Turns         ", &PRIN,  ""    );
-		input( "Primary Coil Inner Diameter     ", &PRIDI, "m"   );
-		input( "Primary Coil Outer Diameter     ", &PRIDO, "m"   );
+		input( "Primary Coil Inner Radius       ", &PRIRI, "m"   );
+		input( "Primary Coil Separation         ", &PRIS , "m"   );
 		input( "Secondary Coil Wire Gauge       ", &SECWG, "AWG" );
 		input( "Secondary Coil Form Diameter    ", &SECD,  "m"   );
 		input( "Secondary Coil Form Height      ", &SECH,  "m"   );
@@ -200,7 +200,8 @@ int main()
 	PRILR = PTCCR;                                         // Inductive Reactance
 	PRIL  = PRILR / ( 2.0*PI*PRIF );                       // Primary Inductance
 	//PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*LTRCS) );           // Primary Resonant Frequency
-	/* VERIFY */ PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);        // Primary Coil Length
+	//PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);                   // Primary Coil Length via DI and DO
+    PRILN = PI * PRIN * PRIS * ( PRIN + 2.0*PI );          // Primary Coil Length via RI and dR
 
 	SECHD = SECH / ( SECD + SECWD );                       // Aspect Ratio
 
