@@ -6,8 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <sys/ioctl.h>
-#include "center.c"
-#include "SI.c"
+#include "Shared.c"
 
 // Declare external centering function.
 extern void center( char* begin, char* text, int col, char pad, char* end );
