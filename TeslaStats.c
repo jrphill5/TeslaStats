@@ -41,6 +41,7 @@ int parseParameter( char* param, float value );
 
 // Write settings to external file.
 int writeSettings( char* file );
+void writeParameter( FILE* file, char* param, float value );
 
 // Input parameters pertaining to the neon sign transformer (NST).
 //  - NSTVI:  RMS input voltage of NST expressed in volts.
@@ -228,6 +229,10 @@ int main()
 
 	/* VERIFY */ ARCLN = 0.04318*sqrt( NSTVA );            // Maximum Theroetical Arclength
 
+	// Write parameters to external file.
+	center("\n","Write Parameters",w.ws_col,'=',"\n\n");
+	writeSettings("parameters.out");
+
 	center("\n","Neon Sign Transformer",w.ws_col,'=',"\n\n");
 	printf("  Input (RMS):      %6.2f%cV %6.2f%cA %6.2f%cHz\n",
 		NSTVI*  SIfactor(NSTVI),  SIprefix(NSTVI),
@@ -286,10 +291,6 @@ int main()
 
 	center("\n","Miscellaneous",w.ws_col,'=',"\n\n");
 	output("Arc Length (max):", &ARCLN, "m"  );
-
-	// Write values to external file.
-	center("\n","Write Values",w.ws_col,'=',"\n\n");
-	writeSettings("parameters.out");
 
 	center("\n","",w.ws_col,'=',"\n\n");
 
@@ -380,7 +381,7 @@ int parseParameter( char* param, float value )
 
 	}
 
-    printf("  %-6s %0.2e\n", param, value);
+    printf("  %s  	%e\n", param, value);
 	return 0;
 
 }
@@ -400,59 +401,67 @@ int writeSettings( char* file )
 	else
 	{
 
-		fprintf( settings, "NSTVI	%e\n", NSTVI );
-		fprintf( settings, "NSTF	%e\n", NSTF  );
-		fprintf( settings, "NSTVO	%e\n", NSTVO );
-		fprintf( settings, "NSTIO	%e\n", NSTIO );
-		fprintf( settings, "NSTRP	%e\n", NSTRP );
-		fprintf( settings, "NSTRS	%e\n", NSTRS );
-		fprintf( settings, "NSTVIP	%e\n", NSTVIP);
-		fprintf( settings, "NSTII	%e\n", NSTII );
-		fprintf( settings, "NSTIIP	%e\n", NSTIIP);
-		fprintf( settings, "NSTVOP	%e\n", NSTVOP);
-		fprintf( settings, "NSTIOP	%e\n", NSTIOP);
-		fprintf( settings, "NSTVA	%e\n", NSTVA );
-		fprintf( settings, "NSTTR	%e\n", NSTTR );
-		fprintf( settings, "NSTZ	%e\n", NSTZ  );
-		fprintf( settings, "NSTR	%e\n", NSTR  );
-		fprintf( settings, "NSTPF	%e\n", NSTPF );
+		writeParameter( settings, "NSTVI",  NSTVI );
+		writeParameter( settings, "NSTF",   NSTF  );
+		writeParameter( settings, "NSTVO",  NSTVO );
+		writeParameter( settings, "NSTIO",  NSTIO );
+		writeParameter( settings, "NSTRP",  NSTRP );
+		writeParameter( settings, "NSTRS",  NSTRS );
+		writeParameter( settings, "NSTVIP", NSTVIP);
+		writeParameter( settings, "NSTII",  NSTII );
+		writeParameter( settings, "NSTIIP", NSTIIP);
+		writeParameter( settings, "NSTVOP", NSTVOP);
+		writeParameter( settings, "NSTIOP", NSTIOP);
+		writeParameter( settings, "NSTVA",  NSTVA );
+		writeParameter( settings, "NSTTR",  NSTTR );
+		writeParameter( settings, "NSTZ",   NSTZ  );
+		writeParameter( settings, "NSTR",   NSTR  );
+		writeParameter( settings, "NSTPF",  NSTPF );
 
-		fprintf( settings, "PTCCR	%e\n", PTCCR );
-		fprintf( settings, "PTCC	%e\n", PTCC  );
-		fprintf( settings, "LTRCS	%e\n", LTRCS );
-		fprintf( settings, "LTRCR	%e\n", LTRCR );
+		writeParameter( settings, "PTCCR",  PTCCR );
+		writeParameter( settings, "PTCC",   PTCC  );
+		writeParameter( settings, "LTRCS",  LTRCS );
+		writeParameter( settings, "LTRCR",  LTRCR );
 
-		fprintf( settings, "PRIWG	%e\n", PRIWG );
-		fprintf( settings, "PRIN	%e\n", PRIN  );
-		fprintf( settings, "PRIRI	%e\n", PRIRI );
-		fprintf( settings, "PRIS	%e\n", PRIS  );
-		fprintf( settings, "PRILR	%e\n", PRILR );
-		fprintf( settings, "PRIWD	%e\n", PRIWD );
-		fprintf( settings, "PRIRO	%e\n", PRIRO );
-		fprintf( settings, "PRIF	%e\n", PRIF  );
-		fprintf( settings, "PRILN	%e\n", PRILN );
-		fprintf( settings, "PRIL	%e\n", PRIL  );
+		writeParameter( settings, "PRIWG",  PRIWG );
+		writeParameter( settings, "PRIN",   PRIN  );
+		writeParameter( settings, "PRIRI",  PRIRI );
+		writeParameter( settings, "PRIS",   PRIS  );
+		writeParameter( settings, "PRILR",  PRILR );
+		writeParameter( settings, "PRIWD",  PRIWD );
+		writeParameter( settings, "PRIRO",  PRIRO );
+		writeParameter( settings, "PRIF",   PRIF  );
+		writeParameter( settings, "PRILN",  PRILN );
+		writeParameter( settings, "PRIL",   PRIL  );
 
-		fprintf( settings, "SECWG	%e\n", SECWG );
-		fprintf( settings, "SECD	%e\n", SECD  );
-		fprintf( settings, "SECH	%e\n", SECH  );
-		fprintf( settings, "SECWD	%e\n", SECWD );
-		fprintf( settings, "SECF	%e\n", SECF  );
-		fprintf( settings, "SECLN	%e\n", SECLN );
-		fprintf( settings, "SECL	%e\n", SECL  );
-		fprintf( settings, "SECC	%e\n", SECC  );
-		fprintf( settings, "SECN	%e\n", SECN  );
-		fprintf( settings, "SECHD	%e\n", SECHD );
+		writeParameter( settings, "SECWG",  SECWG );
+		writeParameter( settings, "SECD",   SECD  );
+		writeParameter( settings, "SECH",   SECH  );
+		writeParameter( settings, "SECWD",  SECWD );
+		writeParameter( settings, "SECF",   SECF  );
+		writeParameter( settings, "SECLN",  SECLN );
+		writeParameter( settings, "SECL",   SECL  );
+		writeParameter( settings, "SECC",   SECC  );
+		writeParameter( settings, "SECN",   SECN  );
+		writeParameter( settings, "SECHD",  SECHD );
 
-		fprintf( settings, "TOPD	%e\n", TOPD  );
-		fprintf( settings, "TOPC	%e\n", TOPC  );
+		writeParameter( settings, "TOPD",   TOPD  );
+		writeParameter( settings, "TOPC",   TOPC  );
 
-		fprintf( settings, "ARCLN	%e\n", ARCLN );
+		writeParameter( settings, "ARCLN",  ARCLN );
 
 		fclose( settings );
 
 		return 0;
 
 	}
+
+}
+
+void writeParameter( FILE* file, char* param, float value )
+{
+
+		fprintf( file, "%s	%e\n", param, value );
+		printf( "  %s  	%e\n", param, value );
 
 }
