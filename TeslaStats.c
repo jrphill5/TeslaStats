@@ -1,6 +1,6 @@
 #define AUTHOR  "Jay Phillips"
 #define NAME    "TeslaStats"
-#define VERSION "1.15"
+#define VERSION "1.16"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,11 +35,91 @@ extern void center( char* begin, char* text, int col, char pad, char* end );
 void input(  char* description, float* value, char* unit );
 void output( char* description, float* value, char* unit );
 
+// Parse settings from external file.
+int parseSettings( char* file );
+int parseParameter( char* param, float value );
+
+// Write settings to external file.
+int writeSettings( char* file );
+
+// Input parameters pertaining to the neon sign transformer (NST).
+//  - NSTVI:  RMS input voltage of NST expressed in volts.
+//  - NSTF:   Input frequency of NST expressed in hertz.
+//  - NSTVO:  RMS output voltage of NST expressed in volts.
+//  - NSTIO:  RMS output current of NST expressed in amps.
+//  - NSTRP:  Resistance of the NST primary expressed in ohms.
+//  - NSTRS:  Resistance of the NST secondary expressed in ohms.
+float NSTVI, NSTF, NSTVO, NSTIO, NSTRP, NSTRS;
+
+// Output parameters pertaining to the neon sign transformer (NST).
+//  - NSTVIP: Peak input voltage of NST expressed in volts.
+//  - NSTII:  RMS input current of NST expressed in amps.
+//  - NSTIIP: Peak input current of NST expressed in amps.
+//  - NSTVOP: Peak output voltage of NST expressed in volts.
+//  - NSTIOP: Peak output current of NST expressed in amps.
+//  - NSTVA:  Power draw of NST expressed in volt-amps.
+//  - NSTTR:  Transformer coil turn ratio of NST.
+//  - NSTZ:   Impedance of NST expressed in ohms.
+//  - NSTR:   Total resistive reactance of NST expressed in ohms.
+//  - NSTPF:  Power factor correction capacitance for NST expressed in farads.
+float NSTVIP, NSTII, NSTIIP, NSTVOP, NSTIOP, NSTVA, NSTTR, NSTZ, NSTR, NSTPF;
+
+// Output parameters pertaining to the primary tank capacitor (PTC).
+//  - PTCC:  Resonant capacitance for PTC expressed in farads.
+//  - LTRCS: Larger than resonant capacitance for PTC with static spark gap expressed in farads.
+//  - LTRCR: Larger than resonant capacitance for PTC with rotary spark gap expressed in farads.
+//  - PTCCR: Capacitive reactance of PTC expressed in ohms.
+float PTCCR, PTCC, LTRCS, LTRCR;
+
+// Input parameters pertaining to the primary coil (PRI).
+//  - PRIWG: American wire gauge of PRI.
+//  - PRIN:  Number of turns of wire in PRI.
+//  - PRIRI: Inner radius of PRI expressed in meters.
+//  - PRIS:  Separation of PRI wrappings expressed in meters.
+float PRIWG, PRIN, PRIRI, PRIS;
+
+// Output parameters pertaining to the primary coil (PRI).
+//  - PRILR: Inductive reactance of PRI expressed in ohms.
+//  - PRIWD: Wire diameter of PRI expressed in meters.
+//  - PRIRO: Outer radius of PRI expressed in meters.
+//  - PRIF:  Resonant frequency of PRI expressed in Hertz.
+//  - PRILN: Length of PRI expressed in meters.
+//  - PRIL:  Inductance of PRI expressed in Henries.
+float PRILR, PRIWD, PRIRO, PRIF, PRILN, PRIL;
+
+// Input parameters pertaining to the secondary coil (SEC).
+//  - SECWG: American wire gauge of SEC.
+//  - SECD:  Diameter of SEC expressed in meters.
+//  - SECH:  Height of SEC expressed in meters.
+float SECWG, SECD, SECH;
+
+// Output parameters pertaining to the secondary coil (SEC).
+//  - SECWD: Wire diameter of SEC expressed in meters.
+//  - SECF:  Resonant frequency of SEC expressed in hertz.
+//  - SECLN: Length of SEC expressed in meters.
+//  - SECL:  Inductance of SEC expressed in henries.
+//  - SECC:  Capacitance of SEC expressed in farads.
+//  - SECN:  Number of turns of wire in SEC.
+//  - SECHD: Coil height to diameter ratio.
+float SECWD, SECF, SECLN, SECL, SECC, SECN, SECHD;
+
+// Input parameters pertaining to the top load (TOP).
+//  - TOPD:  Diameter of TOP expressed in meters.
+float TOPD;
+
+// Output parameters pertaining to the top load (TOP).
+//  - TOPC:  Capacitance of TOP expressed in Farads.
+float TOPC;
+
+// Miscellaneous output parameters.
+//  - ARCLN: Maximum length of arc expressed in meters.
+float ARCLN;
+
 int main()
 {
 
 	// Determine whether program should run in dev mode.
-	const int devel = 1;
+	const int devel = 0;
 
 	// Holds information about program.
 	char name[strlen(NAME)+strlen(VERSION)+2];
@@ -48,69 +128,6 @@ int main()
 	struct winsize w;
 	ioctl(0, TIOCGWINSZ, &w);
 
-	// Variables pertaining to the neon sign transformer (NST).
-	//  - NSTVI:  RMS input voltage of NST expressed in volts.
-	//  - NSTVIP: Peak input voltage of NST expressed in volts.
-	//  - NSTII:  RMS input current of NST expressed in amps.
-	//  - NSTIIP: Peak input current of NST expressed in amps.
-	//  - NSTVO:  RMS output voltage of NST expressed in volts.
-	//  - NSTVOP: Peak output voltage of NST expressed in volts.
-	//  - NSTIO:  RMS output current of NST expressed in amps.
-	//  - NSTIOP: Peak output current of NST expressed in amps.
-	//  - NSTF:   Input frequency of NST expressed in hertz.
-	//  - NSTVA:  Power draw of NST expressed in volt-amps.
-	//  - NSTTR:  Transformer coil turn ratio of NST.
-	//  - NSTZ:   Impedance of NST expressed in ohms.
-	//  - NSTR:   Total resistive reactance of NST expressed in ohms.
-	//  - NSTRP:  Resistance of the NST primary expressed in ohms.
-	//  - NSTRS:  Resistance of the NST secondary expressed in ohms.
-	//  - NSTPF:  Power factor correction capacitance for NST expressed in farads.
-	float NSTVI, NSTVIP, NSTII, NSTIIP;
-	float NSTVO, NSTVOP, NSTIO, NSTIOP;
-	float NSTF, NSTVA, NSTTR, NSTZ, NSTR, NSTRP, NSTRS, NSTPF;
-
-	// Variables pertaining to the primary tank capacitor (PTC).
-	//  - PTCC:  Resonant capacitance for PTC expressed in farads.
-	//  - LTRCS: Larger than resonant capacitance for PTC with static spark gap expressed in farads.
-	//  - LTRCR: Larger than resonant capacitance for PTC with rotary spark gap expressed in farads.
-	//  - PTCCR: Capacitive reactance of PTC expressed in ohms.
-	//  - PRILR: Inductive reactance of PRI expressed in ohms.
-	float PTCCR, PTCC, LTRCS, LTRCR, PRILR;
-
-	// Variables pertaining to the primary coil (PRI).
-	//  - PRIWG: American wire gauge of PRI.
-	//  - PRIWD: Wire diameter of PRI expressed in meters.
-	//  - PRIRI: Inner radius of PRI expressed in meters.
-	//  - PRIRO: Outer radius of PRI expressed in meters.
-	//  - PRIS:  Separation of PRI wrappings expressed in meters.
-	//  - PRIF:  Resonant frequency of PRI expressed in Hertz.
-	//  - PRILN: Length of PRI expressed in meters.
-	//  - PRIL:  Inductance of PRI expressed in Henries.
-	//  - PRIN:  Number of turns of wire in PRI.
-	float PRIWG, PRIWD, PRIRI, PRIRO, PRIS, PRIF, PRILN, PRIL, PRIN;
-
-	// Variables pertaining to the secondary coil (SEC).
-	//  - SECWG: American wire gauge of SEC.
-	//  - SECWD: Wire diameter of SEC expressed in meters.
-	//  - SECD:  Diameter of SEC expressed in meters.
-	//  - SECH:  Height of SEC expressed in meters.
-	//  - SECF:  Resonant frequency of SEC expressed in hertz.
-	//  - SECLN: Length of SEC expressed in meters.
-	//  - SECL:  Inductance of SEC expressed in henries.
-	//  - SECC:  Capacitance of SEC expressed in farads.
-	//  - SECN:  Number of turns of wire in SEC.
-	//  - SECHD: Coil height to diameter ratio.
-	float SECWG, SECWD, SECD, SECH, SECF, SECLN, SECL, SECC, SECN, SECHD;
-
-	// Variables pertaining to the top load (TOP).
-	//  - TOPD:  Diameter of TOP expressed in meters.
-	//  - TOPC:  Capacitance of TOP expressed in Farads.
-	float TOPD, TOPC;
-
-	// Miscellaneous variables.
-	//  - ARCLN: Maximum length of arc expressed in meters.
-	float ARCLN;
-
 	// Define values for the constants and ratios declared above.
 	PI  = 3.1415926535897932384626433832795;
 	PHI = 0.5 * ( 1.0 + sqrt(5.0) );
@@ -118,19 +135,20 @@ int main()
 	U0  = 4.0e-7 * PI;
 	E0  = 1.0 / ( U0*C0*C0 );
 
-	// Define default values for the parameters of the Tesla coil.
-	NSTVI = 120;  NSTF  = 60;
-	NSTVO = 9000; NSTIO = 0.030;
-	NSTRP = 1.7;  NSTRS = 13000;
-	PRIWG = 12;   PRIN  = 7;
-	PRIRI = 0.05; PRIS  = 0.02;
-	SECWG = 26;   SECD  = 0.06;
-	SECH  = 0.47; TOPD  = 0.15;
+	center("\n","",w.ws_col,'=',"\n\n");
+	sprintf(name,"%s v%s",NAME,VERSION);
+	center("",name,w.ws_col,' ',"\n");
+	center("",AUTHOR,w.ws_col,' ',"\n");
+
+	// Read in parameters from external file.
+	center("\n","Parse Parameters",w.ws_col,'=',"\n\n");
+	parseSettings("parameters.dat");
 
 	// Prompt user to input parameters of coil.
 	if ( devel == 0 )
 	{
 
+		center("\n","Edit Parameters",w.ws_col,'=',"\n\n");
 		input( "Transformer Input Voltage       ", &NSTVI, "V"   );
 		input( "Transformer Input Frequency     ", &NSTF,  "Hz"  );
 		input( "Transformer Output Voltage      ", &NSTVO, "V"   );
@@ -210,11 +228,6 @@ int main()
 
 	/* VERIFY */ ARCLN = 0.04318*sqrt( NSTVA );            // Maximum Theroetical Arclength
 
-	center("\n","",w.ws_col,'=',"\n\n");
-	sprintf(name,"%s v%s",NAME,VERSION);
-	center("",name,w.ws_col,' ',"\n");
-	center("",AUTHOR,w.ws_col,' ',"\n");
-
 	center("\n","Neon Sign Transformer",w.ws_col,'=',"\n\n");
 	printf("  Input (RMS):      %6.2f%cV %6.2f%cA %6.2f%cHz\n",
 		NSTVI*  SIfactor(NSTVI),  SIprefix(NSTVI),
@@ -274,6 +287,10 @@ int main()
 	center("\n","Miscellaneous",w.ws_col,'=',"\n\n");
 	output("Arc Length (max):", &ARCLN, "m"  );
 
+	// Write values to external file.
+	center("\n","Write Values",w.ws_col,'=',"\n\n");
+	writeSettings("parameters.out");
+
 	center("\n","",w.ws_col,'=',"\n\n");
 
 	return 0;
@@ -298,7 +315,7 @@ void input( char* description, float* value, char* unit )
 	char enteredString[10];
 
 	sprintf(defaultString,"%6.2f%c%-3s",*value*SIfactor(*value),SIprefix(*value),unit);
-	printf("%s [%s]: ", description, defaultString);
+	printf("  %s [%s]: ", description, defaultString);
 	fgets(enteredString, sizeof enteredString, stdin);
 	if (strlen(enteredString) != 0) sprintf(defaultString,"%s%c%s",enteredString,SIprefix(*value),unit);
 	sscanf(defaultString,"%f%c%c\n",*&value,&dum,&dum);
@@ -309,5 +326,133 @@ void output( char* description, float* value, char* unit )
 {
 
 	printf("  %s %6.2f%c%s\n", description, *value*SIfactor(*value), SIprefix(*value), unit);
+
+}
+
+int parseSettings( char* file )
+{
+
+	char param[6] = {0};
+	float value = 0.0;
+	FILE* settings = fopen( file, "r" );
+
+	if ( !settings )
+	{
+
+		fprintf(stderr, "Cannot open %s for parsing!\n", file);
+		return 1;
+
+	}
+	else
+	{
+
+		while ( fscanf(settings, "%s %f", param, &value) != EOF )
+			parseParameter( param, value );
+		fclose( settings );
+		return 0;
+
+	}
+
+}
+
+int parseParameter( char* param, float value )
+{
+
+	     if ( strcmp( param, "NSTVI" ) == 0 ) NSTVI = value;
+	else if ( strcmp( param, "NSTF"  ) == 0 ) NSTF  = value;
+	else if ( strcmp( param, "NSTVO" ) == 0 ) NSTVO = value;
+	else if ( strcmp( param, "NSTIO" ) == 0 ) NSTIO = value;
+	else if ( strcmp( param, "NSTRP" ) == 0 ) NSTRP = value;
+	else if ( strcmp( param, "NSTRS" ) == 0 ) NSTRS = value;
+	else if ( strcmp( param, "PRIWG" ) == 0 ) PRIWG = value;
+	else if ( strcmp( param, "PRIN"  ) == 0 ) PRIN  = value;
+	else if ( strcmp( param, "PRIRI" ) == 0 ) PRIRI = value;
+	else if ( strcmp( param, "PRIS"  ) == 0 ) PRIS  = value;
+	else if ( strcmp( param, "SECWG" ) == 0 ) SECWG = value;
+	else if ( strcmp( param, "SECD"  ) == 0 ) SECD  = value;
+	else if ( strcmp( param, "SECH"  ) == 0 ) SECH  = value;
+	else if ( strcmp( param, "TOPD"  ) == 0 ) TOPD  = value;
+	else
+	{
+
+		fprintf(stderr, "  %s not valid parameter.\n", param);
+		return 1;
+
+	}
+
+    printf("  %-6s %0.2e\n", param, value);
+	return 0;
+
+}
+
+int writeSettings( char* file )
+{
+
+	FILE* settings = fopen( file, "w" );
+
+	if ( !settings )
+	{
+
+		fprintf(stderr, "Cannot open %s for writing!\n", file);
+		return 1;
+
+	}
+	else
+	{
+
+		fprintf( settings, "NSTVI	%e\n", NSTVI );
+		fprintf( settings, "NSTF	%e\n", NSTF  );
+		fprintf( settings, "NSTVO	%e\n", NSTVO );
+		fprintf( settings, "NSTIO	%e\n", NSTIO );
+		fprintf( settings, "NSTRP	%e\n", NSTRP );
+		fprintf( settings, "NSTRS	%e\n", NSTRS );
+		fprintf( settings, "NSTVIP	%e\n", NSTVIP);
+		fprintf( settings, "NSTII	%e\n", NSTII );
+		fprintf( settings, "NSTIIP	%e\n", NSTIIP);
+		fprintf( settings, "NSTVOP	%e\n", NSTVOP);
+		fprintf( settings, "NSTIOP	%e\n", NSTIOP);
+		fprintf( settings, "NSTVA	%e\n", NSTVA );
+		fprintf( settings, "NSTTR	%e\n", NSTTR );
+		fprintf( settings, "NSTZ	%e\n", NSTZ  );
+		fprintf( settings, "NSTR	%e\n", NSTR  );
+		fprintf( settings, "NSTPF	%e\n", NSTPF );
+
+		fprintf( settings, "PTCCR	%e\n", PTCCR );
+		fprintf( settings, "PTCC	%e\n", PTCC  );
+		fprintf( settings, "LTRCS	%e\n", LTRCS );
+		fprintf( settings, "LTRCR	%e\n", LTRCR );
+
+		fprintf( settings, "PRIWG	%e\n", PRIWG );
+		fprintf( settings, "PRIN	%e\n", PRIN  );
+		fprintf( settings, "PRIRI	%e\n", PRIRI );
+		fprintf( settings, "PRIS	%e\n", PRIS  );
+		fprintf( settings, "PRILR	%e\n", PRILR );
+		fprintf( settings, "PRIWD	%e\n", PRIWD );
+		fprintf( settings, "PRIRO	%e\n", PRIRO );
+		fprintf( settings, "PRIF	%e\n", PRIF  );
+		fprintf( settings, "PRILN	%e\n", PRILN );
+		fprintf( settings, "PRIL	%e\n", PRIL  );
+
+		fprintf( settings, "SECWG	%e\n", SECWG );
+		fprintf( settings, "SECD	%e\n", SECD  );
+		fprintf( settings, "SECH	%e\n", SECH  );
+		fprintf( settings, "SECWD	%e\n", SECWD );
+		fprintf( settings, "SECF	%e\n", SECF  );
+		fprintf( settings, "SECLN	%e\n", SECLN );
+		fprintf( settings, "SECL	%e\n", SECL  );
+		fprintf( settings, "SECC	%e\n", SECC  );
+		fprintf( settings, "SECN	%e\n", SECN  );
+		fprintf( settings, "SECHD	%e\n", SECHD );
+
+		fprintf( settings, "TOPD	%e\n", TOPD  );
+		fprintf( settings, "TOPC	%e\n", TOPC  );
+
+		fprintf( settings, "ARCLN	%e\n", ARCLN );
+
+		fclose( settings );
+
+		return 0;
+
+	}
 
 }
