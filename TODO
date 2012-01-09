@@ -1,2 +1,3 @@
 NST: add ballast current limiting calculations
 NST: implement rated vs. actual voltage input (for variac operation)
+SI:  allow specification of default prefix
