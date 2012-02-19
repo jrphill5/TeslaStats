@@ -223,7 +223,7 @@ int main()
 	PRIL  = PRILR / ( 2.0*PI*PRIF );                       // Primary Inductance
 	//PRIF  = 1.0 / ( 2.0*PI*sqrt(PRIL*LTRCS) );           // Primary Resonant Frequency
 	//PRILN = 0.5*PI*PRIN*(PRIDI+PRIDO);                   // Primary Coil Length via DI and DO
-    PRILN = PI * PRIN * PRIS * ( PRIN + 2.0*PI );          // Primary Coil Length via RI and dR
+	PRILN = PI * PRIN * PRIS * ( PRIN + 2.0*PI );          // Primary Coil Length via RI and dR
 
 	SECHD = SECH / ( SECD + SECWD );                       // Aspect Ratio
 
